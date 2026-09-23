@@ -1,0 +1,36 @@
+---
+import { imageAspectClass, imageRadiusClass } from "../../../lib/variants";
+import { clean, pick } from "../../../lib/sanity/clean";
+import { urlFor } from "../../../lib/sanity/image";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { BlockRenderProps, SanityImage } from "../../../lib/sanity/load";
+
+interface Props extends BlockRenderProps {
+  image?: SanityImage | null;
+  caption?: string | null;
+}
+
+const { block, image, caption, preview, documentId, path, eager = false } = Astro.props;
+const source = image ?? block.image;
+const aspect = pick(imageAspectClass, block.aspect, "auto");
+const radius = pick(imageRadiusClass, block.radius, "none");
+const cropped = clean(block.aspect) !== "" && clean(block.aspect) !== "auto";
+const label = caption ?? block.caption;
+---
+
+{
+  source?.asset && (
+    <figure data-sanity={dataSanity(preview, documentId, path)}>
+      <img
+        src={urlFor(source).width(1600).auto("format").url()}
+        alt={clean(source.alt)}
+        width={source.dimensions?.width}
+        height={source.dimensions?.height}
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+        class:list={["w-full", radius, aspect, cropped && "object-cover"]}
+      />
+      {label && <figcaption class="mt-2 text-body-sm text-fg-muted">{label}</figcaption>}
+    </figure>
+  )
+}

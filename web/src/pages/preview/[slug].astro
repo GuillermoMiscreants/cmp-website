@@ -1,0 +1,20 @@
+---
+import PageView from "../../components/blocks/PageView.astro";
+import { loadPage } from "../../lib/sanity/load";
+import { isPreview, slugFromParam, toPublicPath } from "../../lib/sanity/preview";
+
+export const prerender = false;
+
+if (!isPreview(Astro.cookies)) {
+  return Astro.redirect(toPublicPath(Astro.url.pathname));
+}
+
+const slug = slugFromParam(Astro.params.slug);
+const { page, settings } = await loadPage(slug, true);
+
+if (!page) {
+  return new Response("Page not found", { status: 404 });
+}
+---
+
+<PageView page={page} settings={settings} preview />

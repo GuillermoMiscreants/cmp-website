@@ -1,0 +1,54 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Footer from "../Footer.astro";
+import SectionMain from "../SectionMain.astro";
+import SectionBlock from "./containers/Section.astro";
+import LogoMarqueeBlock from "./sealed/LogoMarqueeBlock.astro";
+import FaqBlock from "./sealed/FaqBlock.astro";
+import { PortableText } from "astro-portabletext";
+import { homepageSchema } from "../../lib/schema";
+import { clean } from "../../lib/sanity/clean";
+import { urlFor } from "../../lib/sanity/image";
+import type { PageDocument, SiteSettings } from "../../lib/sanity/load";
+
+interface Props {
+  page: PageDocument;
+  settings?: SiteSettings | null;
+  preview?: boolean;
+}
+
+const { page, settings, preview = false } = Astro.props;
+const title = clean(page.seo?.title) || clean(page.title) || clean(settings?.siteTitle) || "Page";
+const description = clean(page.seo?.description) || undefined;
+const image = page.seo?.ogImage?.asset ? urlFor(page.seo.ogImage).width(1200).url() : undefined;
+const isHome = clean(page.slug) === "home";
+const sections = page.sections ?? [];
+const legacyBody = sections.length === 0 && Array.isArray(page.legacyBody) ? page.legacyBody : [];
+---
+
+<Layout title={title} description={description} image={image} preview={preview} jsonLd={isHome ? homepageSchema : undefined}>
+  <main id="main">
+    {
+      sections.map((section, index) =>
+        section._type === "section" ? (
+          <SectionBlock block={section} preview={preview} documentId={page._id} eager={index === 0} />
+        ) : section._type === "logoMarquee" ? (
+          <LogoMarqueeBlock block={section} preview={preview} documentId={page._id} />
+        ) : section._type === "faq" ? (
+          <FaqBlock block={section} preview={preview} documentId={page._id} />
+        ) : null,
+      )
+    }
+    {
+      legacyBody.length > 0 && (
+        <SectionMain padding="lg">
+          <h1 class="h1">{page.title}</h1>
+          <div class="mt-6 max-w-prose text-body-md [&_a]:underline [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5">
+            <PortableText value={legacyBody} />
+          </div>
+        </SectionMain>
+      )
+    }
+  </main>
+  <Footer tagline={settings?.footerTagline || undefined} copyright={settings?.footerCopyright || undefined} />
+</Layout>

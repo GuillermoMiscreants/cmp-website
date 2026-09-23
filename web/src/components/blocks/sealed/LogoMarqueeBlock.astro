@@ -1,0 +1,42 @@
+---
+import SectionMain from "../../SectionMain.astro";
+import LogoMarquee from "../../LogoMarquee.astro";
+import { urlFor } from "../../../lib/sanity/image";
+import { clean } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { PageBlock } from "../../../lib/sanity/load";
+
+interface Props {
+  block: PageBlock;
+  preview: boolean;
+  documentId: string;
+}
+
+const { block, preview, documentId } = Astro.props;
+const path = `sections[_key=="${block._key}"]`;
+const background = clean(block.background);
+const theme = background === "dark" || background === "brand" ? background : undefined;
+---
+
+<SectionMain
+  padding="none"
+  contentPadding="none"
+  borderTop
+  class:list={[background === "muted" && "bg-panel-muted"]}
+  data-theme={theme}
+  data-sanity={dataSanity(preview, documentId, path)}
+>
+  <LogoMarquee label={block.label || undefined}>
+    {
+      (block.logos ?? []).map((logo) =>
+        logo.asset ? (
+          <img
+            src={urlFor(logo).height(64).url()}
+            alt={clean(logo.alt)}
+            class="h-16 w-24 object-contain"
+          />
+        ) : null,
+      )
+    }
+  </LogoMarquee>
+</SectionMain>

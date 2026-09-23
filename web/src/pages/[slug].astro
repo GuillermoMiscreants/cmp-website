@@ -1,0 +1,22 @@
+---
+import PageView from "../components/blocks/PageView.astro";
+import { loadPage } from "../lib/sanity/load";
+import { getClient } from "../lib/sanity/client";
+import { PAGE_SLUGS_QUERY } from "../lib/sanity/queries";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const client = getClient({ preview: false });
+  return await client.fetch(PAGE_SLUGS_QUERY);
+}
+
+const { slug } = Astro.params;
+const { page, settings } = await loadPage(slug || "", false);
+
+if (!page) {
+  return new Response(null, { status: 404, statusText: "Not Found" });
+}
+---
+
+<PageView page={page} settings={settings} />

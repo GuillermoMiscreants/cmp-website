@@ -1,0 +1,40 @@
+---
+import Media from "../../Media.astro";
+import { imageAspect } from "../../../lib/variants";
+import { clean, pick } from "../../../lib/sanity/clean";
+import { urlFor } from "../../../lib/sanity/image";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { BlockRenderProps } from "../../../lib/sanity/load";
+
+const aspectValue: Record<(typeof imageAspect)[number]["value"], string> = {
+  auto: "auto",
+  "16/9": "16/9",
+  "4/3": "4/3",
+  "1/1": "1/1",
+  "3/4": "3/4",
+};
+
+type Props = BlockRenderProps;
+const { block, preview, documentId, path } = Astro.props;
+const mode = pick(
+  { autoplay: "autoplay", hover: "hover", click: "click" },
+  block.mode,
+  "click",
+) as "autoplay" | "hover" | "click";
+const aspect = pick(aspectValue, block.aspect, "16/9");
+const poster = block.poster?.asset ? urlFor(block.poster).width(1600).url() : undefined;
+---
+
+{
+  block.url && (
+    <div data-sanity={dataSanity(preview, documentId, path)}>
+      <Media
+        src={clean(block.url)}
+        poster={poster}
+        alt={clean(block.poster?.alt)}
+        mode={mode}
+        aspect={aspect}
+      />
+    </div>
+  )
+}

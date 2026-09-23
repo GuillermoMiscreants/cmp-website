@@ -1,0 +1,33 @@
+---
+import Button from "../../Button.astro";
+import type { ButtonVariant } from "../../../lib/variants";
+import { pick } from "../../../lib/sanity/clean";
+import { resolveLink } from "../../../lib/sanity/links";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { ButtonField } from "../../../lib/sanity/load";
+
+interface Props {
+  button: ButtonField;
+  preview: boolean;
+  documentId: string;
+  path: string;
+}
+
+const { button, preview, documentId, path } = Astro.props;
+const variantMap: Record<ButtonVariant, ButtonVariant> = {
+  primary: "primary",
+  secondary: "secondary",
+  tertiary: "tertiary",
+};
+const variant = pick(variantMap, button.variant, "primary") as ButtonVariant;
+const link = resolveLink(button.link);
+---
+
+<Button
+  label={button.label || "Learn More"}
+  variant={variant}
+  href={link?.href}
+  target={link?.target}
+  withArrow={button.withArrow !== false}
+  data-sanity={dataSanity(preview, documentId, path)}
+/>

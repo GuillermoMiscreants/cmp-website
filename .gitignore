@@ -1,0 +1,35 @@
+# Secrets and local env
+.env
+.env.*
+!.env.example
+.dev.vars
+*.local
+*.pem
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+.astro/
+.wrangler/
+.sanity/
+schema.json
+
+# Logs and coverage
+logs/
+*.log
+npm-debug.log*
+coverage/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,29 @@
+---
+import { PortableText } from "astro-portabletext";
+import { alignClass, textSizeClass, toneClass } from "../../../lib/variants";
+import { pick } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { BlockRenderProps } from "../../../lib/sanity/load";
+
+type Props = BlockRenderProps;
+const { block, preview, documentId, path, inheritedAlign = "left" } = Astro.props;
+const size = pick(textSizeClass, block.size, "text-body-md");
+const tone = pick(toneClass, block.tone, "default");
+const align = pick(alignClass, block.align || inheritedAlign, inheritedAlign);
+---
+
+{
+  Array.isArray(block.body) && block.body.length > 0 && (
+    <div
+      class:list={[
+        size,
+        tone,
+        align,
+        "max-w-prose [&_a]:underline [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5",
+      ]}
+      data-sanity={dataSanity(preview, documentId, path)}
+    >
+      <PortableText value={block.body} />
+    </div>
+  )
+}

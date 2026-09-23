@@ -1,0 +1,28 @@
+---
+import Grid from "../../Grid.astro";
+import Card from "./Card.astro";
+import { pick } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { BlockRenderProps } from "../../../lib/sanity/load";
+
+type Props = BlockRenderProps;
+const { block, preview, documentId, path } = Astro.props;
+const columnValue = typeof block.columns === "string" ? block.columns : "2";
+const columns = Number(pick({ "2": "2", "3": "3", "4": "4", "5": "5" }, columnValue, "2")) as 2 | 3 | 4 | 5;
+const cards = block.cards ?? [];
+---
+
+<div data-sanity={dataSanity(preview, documentId, path)}>
+  <Grid mobile={1} desktop={columns} gap="gap-6" data-sanity={dataSanity(preview, documentId, `${path}.cards`)}>
+    {
+      cards.map((card) => (
+        <Card
+          card={card}
+          preview={preview}
+          documentId={documentId}
+          path={`${path}.cards[_key=="${card._key}"]`}
+        />
+      ))
+    }
+  </Grid>
+</div>

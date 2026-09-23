@@ -1,0 +1,28 @@
+---
+import UiButtonGroup from "../../ButtonGroup.astro";
+import CmsButton from "./CmsButton.astro";
+import { justifyClass } from "../../../lib/variants";
+import { pick } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { BlockRenderProps } from "../../../lib/sanity/load";
+
+type Props = BlockRenderProps;
+const { block, preview, documentId, path, inheritedAlign = "left" } = Astro.props;
+const align = pick(justifyClass, block.align || inheritedAlign, inheritedAlign);
+const buttons = block.buttons ?? [];
+---
+
+<div data-sanity={dataSanity(preview, documentId, path)}>
+  <UiButtonGroup class={align} data-sanity={dataSanity(preview, documentId, `${path}.buttons`)}>
+    {
+      buttons.map((button) => (
+        <CmsButton
+          button={button}
+          preview={preview}
+          documentId={documentId}
+          path={`${path}.buttons[_key=="${button._key}"]`}
+        />
+      ))
+    }
+  </UiButtonGroup>
+</div>

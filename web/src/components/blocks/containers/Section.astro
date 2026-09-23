@@ -1,0 +1,50 @@
+---
+import SectionMain from "../../SectionMain.astro";
+import Blocks from "../Blocks.astro";
+import { alignClass, sectionVariantProps, type Align, type Background, type SectionVariant, type Spacing } from "../../../lib/variants";
+import { clean } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { PageBlock } from "../../../lib/sanity/load";
+
+interface Props {
+  block: PageBlock;
+  preview: boolean;
+  documentId: string;
+  eager?: boolean;
+}
+
+const { block, preview, documentId, eager = false } = Astro.props;
+const path = `sections[_key=="${block._key}"]`;
+const variant = clean(block.variant) as SectionVariant;
+const width = sectionVariantProps[variant] ?? sectionVariantProps.default;
+const bg = clean(block.background) as Background;
+const theme = bg === "dark" || bg === "brand" ? bg : undefined;
+const spacingValue = (["none", "xs", "sm", "md", "lg", "xl"] as const).includes(clean(block.spacing) as Spacing)
+  ? (clean(block.spacing) as Spacing)
+  : "md";
+const align = (["left", "center", "right"] as const).includes(clean(block.align) as Align)
+  ? (clean(block.align) as Align)
+  : "left";
+---
+
+<SectionMain
+  id={block._key}
+  padding={spacingValue}
+  contentPadding={width.contentPadding}
+  borderTop={Boolean(block.borderTop)}
+  class:list={[bg === "muted" && "bg-panel-muted"]}
+  data-theme={theme}
+  data-sanity={dataSanity(preview, documentId, path)}
+  contentClass={[width.contentClass, alignClass[align]].filter(Boolean).join(" ")}
+>
+  <div data-sanity={dataSanity(preview, documentId, `${path}.content`)}>
+    <Blocks
+      blocks={block.content ?? []}
+      preview={preview}
+      documentId={documentId}
+      basePath={`${path}.content`}
+      inheritedAlign={align}
+      eager={eager}
+    />
+  </div>
+</SectionMain>

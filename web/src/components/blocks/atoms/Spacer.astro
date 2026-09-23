@@ -1,0 +1,11 @@
+---
+import { spacingClass } from "../../../lib/variants";
+import { pick } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { BlockRenderProps } from "../../../lib/sanity/load";
+
+type Props = BlockRenderProps;
+const { block, preview, documentId, path } = Astro.props;
+---
+
+<div class={pick(spacingClass, block.size, "md")} aria-hidden="true" data-sanity={dataSanity(preview, documentId, path)}></div>

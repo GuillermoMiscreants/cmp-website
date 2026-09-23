@@ -1,0 +1,11 @@
+---
+import { dividerClass } from "../../../lib/variants";
+import { pick } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { BlockRenderProps } from "../../../lib/sanity/load";
+
+type Props = BlockRenderProps;
+const { block, preview, documentId, path } = Astro.props;
+---
+
+<hr class:list={["border-t", pick(dividerClass, block.tone, "default")]} data-sanity={dataSanity(preview, documentId, path)} />

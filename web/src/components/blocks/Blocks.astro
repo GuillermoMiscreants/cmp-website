@@ -1,0 +1,53 @@
+---
+import Heading from "./atoms/Heading.astro";
+import Eyebrow from "./atoms/Eyebrow.astro";
+import RichText from "./atoms/RichText.astro";
+import ButtonGroup from "./atoms/ButtonGroup.astro";
+import Image from "./atoms/Image.astro";
+import Video from "./atoms/Video.astro";
+import Spacer from "./atoms/Spacer.astro";
+import Divider from "./atoms/Divider.astro";
+import CardGrid from "./atoms/CardGrid.astro";
+import Columns from "./containers/Columns.astro";
+import type { Align } from "../../lib/variants";
+import type { PageBlock } from "../../lib/sanity/load";
+
+interface Props {
+  blocks: PageBlock[];
+  preview: boolean;
+  documentId: string;
+  basePath: string;
+  inheritedAlign?: Align;
+  eager?: boolean;
+}
+
+const { blocks, preview, documentId, basePath, inheritedAlign = "left", eager = false } = Astro.props;
+---
+
+{
+  blocks.map((block, index) => {
+    const path = `${basePath}[_key=="${block._key}"]`;
+    const shared = { block, preview, documentId, path, inheritedAlign, eager: eager && index === 0 };
+    return block._type === "heading" ? (
+      <Heading {...shared} />
+    ) : block._type === "eyebrow" ? (
+      <Eyebrow {...shared} />
+    ) : block._type === "richText" ? (
+      <RichText {...shared} />
+    ) : block._type === "buttonGroup" ? (
+      <ButtonGroup {...shared} />
+    ) : block._type === "imageBlock" ? (
+      <Image {...shared} />
+    ) : block._type === "video" ? (
+      <Video {...shared} />
+    ) : block._type === "spacer" ? (
+      <Spacer {...shared} />
+    ) : block._type === "divider" ? (
+      <Divider {...shared} />
+    ) : block._type === "cardGrid" ? (
+      <CardGrid {...shared} />
+    ) : block._type === "columns" ? (
+      <Columns {...shared} />
+    ) : null;
+  })
+}

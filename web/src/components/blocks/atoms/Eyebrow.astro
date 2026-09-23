@@ -1,0 +1,15 @@
+---
+import { alignClass, toneClass } from "../../../lib/variants";
+import { pick } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { BlockRenderProps } from "../../../lib/sanity/load";
+
+type Props = BlockRenderProps;
+const { block, preview, documentId, path, inheritedAlign = "left" } = Astro.props;
+const align = pick(alignClass, block.align || inheritedAlign, inheritedAlign);
+const tone = pick(toneClass, block.tone, "muted");
+---
+
+<p class:list={["text-body-xsm", tone, align]} data-sanity={dataSanity(preview, documentId, path)}>
+  {block.text}
+</p>

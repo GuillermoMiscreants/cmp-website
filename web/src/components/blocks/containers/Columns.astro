@@ -1,0 +1,73 @@
+---
+import Blocks from "../Blocks.astro";
+import Grid from "../../Grid.astro";
+import {
+  columnsLayoutSpec,
+  gapClass,
+  verticalAlignClass,
+  type ColumnsLayout,
+} from "../../../lib/variants";
+import { clean, pick } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { BlockRenderProps } from "../../../lib/sanity/load";
+
+type Props = BlockRenderProps;
+const { block, preview, documentId, path, inheritedAlign = "left" } = Astro.props;
+const layout = clean(block.layout) as ColumnsLayout;
+const spec = columnsLayoutSpec[layout] ?? columnsLayoutSpec["1-1"];
+const gap = pick(gapClass, block.gap, "md");
+const vertical = pick(verticalAlignClass, block.verticalAlign, "top");
+const columns = Array.isArray(block.columns) ? block.columns : [];
+---
+
+<div data-sanity={dataSanity(preview, documentId, path)}>
+  {
+    spec.spans ? (
+      <div
+        class:list={["grid grid-cols-1 md:grid-cols-3", gap, vertical]}
+        data-sanity={dataSanity(preview, documentId, `${path}.columns`)}
+      >
+        {
+          columns.map((column, index) => (
+            <div class:list={[spec.spans?.[index] === 2 && "md:col-span-2"]} data-sanity={dataSanity(preview, documentId, `${path}.columns[_key=="${column._key}"]`)}>
+              <div data-sanity={dataSanity(preview, documentId, `${path}.columns[_key=="${column._key}"].content`)}>
+                <Blocks
+                  blocks={column.content ?? []}
+                  preview={preview}
+                  documentId={documentId}
+                  basePath={`${path}.columns[_key=="${column._key}"].content`}
+                  inheritedAlign={inheritedAlign}
+                />
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    ) : (
+      <Grid
+        mobile={1}
+        tablet={spec.tablet}
+        desktop={spec.desktop}
+        gap={gap}
+        class={vertical}
+        data-sanity={dataSanity(preview, documentId, `${path}.columns`)}
+      >
+        {
+          columns.map((column) => (
+            <div data-sanity={dataSanity(preview, documentId, `${path}.columns[_key=="${column._key}"]`)}>
+              <div data-sanity={dataSanity(preview, documentId, `${path}.columns[_key=="${column._key}"].content`)}>
+                <Blocks
+                  blocks={column.content ?? []}
+                  preview={preview}
+                  documentId={documentId}
+                  basePath={`${path}.columns[_key=="${column._key}"].content`}
+                  inheritedAlign={inheritedAlign}
+                />
+              </div>
+            </div>
+          ))
+        }
+      </Grid>
+    )
+  }
+</div>

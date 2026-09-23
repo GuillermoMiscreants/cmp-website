@@ -1,0 +1,67 @@
+---
+import { Icon } from "astro-icon/components";
+import CardFeatured from "../../CardFeatured.astro";
+import CardIcon from "../../CardIcon.astro";
+import CmsButton from "./CmsButton.astro";
+import Image from "./Image.astro";
+import {
+  iconName,
+  textAlignClass,
+  type CardBorder,
+} from "../../../lib/variants";
+import { pick } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { PageBlock } from "../../../lib/sanity/load";
+
+interface CardProps {
+  card: PageBlock;
+  preview: boolean;
+  documentId: string;
+  path: string;
+}
+const borderMap: Record<CardBorder, CardBorder> = { all: "all", y: "y", x: "x", none: "none" };
+const iconMap: Record<(typeof iconName)[number]["value"], string> = {
+  "lucide:activity": "lucide:activity",
+  "lucide:shield-check": "lucide:shield-check",
+  "lucide:server": "lucide:server",
+  "lucide:headphones": "lucide:headphones",
+  "lucide:life-buoy": "lucide:life-buoy",
+  "lucide:layers": "lucide:layers",
+  "lucide:database": "lucide:database",
+  "lucide:zap": "lucide:zap",
+  "lucide:settings-2": "lucide:settings-2",
+};
+
+const { card, preview, documentId, path } = Astro.props as CardProps;
+const align = pick(textAlignClass, card.align, "left");
+const style = pick({ featured: "featured", icon: "icon" }, card.style, "featured");
+const attr = dataSanity(preview, documentId, path);
+---
+
+<div class="h-full" data-sanity={attr}>
+{
+  style === "icon" ? (
+    <CardIcon header={card.header || ""} class={align}>
+      <Icon slot="icon" name={pick(iconMap, card.icon, "lucide:activity")} class="mb-4 h-6 w-6 text-fg-muted" aria-hidden="true" />
+      {card.body && <p slot="content">{card.body}</p>}
+    </CardIcon>
+  ) : (
+    <CardFeatured
+      title={card.title || ""}
+      description={card.description || ""}
+      border={pick(borderMap, card.border, "none") as CardBorder}
+      titleTag="h3"
+      titleClass="h3"
+      class={align}
+    >
+      {card.eyebrow && <span slot="eyebrow">{card.eyebrow}</span>}
+      {card.image?.asset && (
+        <Image slot="media" block={card} image={card.image} preview={preview} documentId={documentId} path={`${path}.image`} />
+      )}
+      {card.button && (
+        <CmsButton slot="button" button={card.button} preview={preview} documentId={documentId} path={`${path}.button`} />
+      )}
+    </CardFeatured>
+  )
+}
+</div>

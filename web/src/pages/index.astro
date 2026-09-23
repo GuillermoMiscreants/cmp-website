@@ -1,0 +1,22 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PageView from "../components/blocks/PageView.astro";
+import { loadPage } from "../lib/sanity/load";
+
+export const prerender = true;
+
+const { page, settings } = await loadPage("home", false);
+---
+
+{
+  page ? (
+    <PageView page={page} settings={settings} />
+  ) : (
+    <Layout title="Home">
+      <main id="main" class="container-page py-24">
+        <h1 class="h1">No home page yet</h1>
+        <p class="mt-4 text-body-lg text-fg-muted">Publish a page with the slug home to fill this route.</p>
+      </main>
+    </Layout>
+  )
+}

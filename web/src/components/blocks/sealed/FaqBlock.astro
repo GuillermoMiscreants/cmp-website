@@ -1,0 +1,41 @@
+---
+import SectionMain from "../../SectionMain.astro";
+import AccordionFAQ from "../../AccordionFAQ.astro";
+import { clean } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { PageBlock } from "../../../lib/sanity/load";
+
+interface Props {
+  block: PageBlock;
+  preview: boolean;
+  documentId: string;
+}
+
+const { block, preview, documentId } = Astro.props;
+const path = `sections[_key=="${block._key}"]`;
+const background = clean(block.background);
+const theme = background === "dark" || background === "brand" ? background : undefined;
+const items = (block.items ?? [])
+  .filter((item) => item.question && item.answer)
+  .map((item) => ({ question: item.question || "", answer: item.answer || "" }));
+---
+
+<SectionMain
+  padding="sm"
+  borderTop
+  class:list={[background === "muted" && "bg-panel-muted"]}
+  data-theme={theme}
+  data-sanity={dataSanity(preview, documentId, path)}
+>
+  {(block.heading || block.intro) && (
+    <div class="mb-6 flex flex-col gap-4">
+      {block.heading && <h2 class="h3">{block.heading}</h2>}
+      {block.intro && <p class="text-fg-muted">{block.intro}</p>}
+    </div>
+  )}
+  <AccordionFAQ
+    items={items}
+    closePrevious={block.closePrevious !== false}
+    openByDefault={typeof block.openByDefault === "number" ? block.openByDefault : undefined}
+  />
+</SectionMain>
