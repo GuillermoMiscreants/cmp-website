@@ -1,12 +1,12 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "astro-miscreants-starter-v1",
+  "name": "cmp-website",
   "compatibility_date": "2026-04-04",
   "compatibility_flags": ["nodejs_compat"],
   // Pure static site (no adapter): the build emits the whole tree to dist/.
   // No `main` worker — Cloudflare just serves the static assets.
   "assets": { "directory": "./dist" },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
 
   // ── Contact form ─────────────────────────────────────────────────────────
   // The endpoint is a Pages Function at functions/api/contact.ts — outside the
