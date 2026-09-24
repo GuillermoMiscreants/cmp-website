@@ -7,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 import icon from 'astro-icon';
 import sanity from '@sanity/astro';
 import cloudflare from '@astrojs/cloudflare';
+import react from '@astrojs/react';
 
 // astro.config.mjs runs before Astro loads env files, so PUBLIC_* is not on
 // import.meta.env yet. loadEnv reads the same variables the pages use.
@@ -90,6 +91,7 @@ function demoRoutes() {
 // index.ts.disabled).
 
 /** Preview endpoints exist only on the dev server and the preview deployment. */
+/** @returns {import('astro').AstroIntegration} */
 function sanityPreviewRoutes() {
   return {
     name: 'sanity-preview-routes',
@@ -164,6 +166,9 @@ export default defineConfig({
     inlineStylesheets: 'always',
   },
   integrations: [
+    // The React renderer is only for the preview palette. Leave it off the
+    // static production build so that client chunk is not emitted.
+    ...(visualEditing || isDev ? [react()] : []),
     sanity({
       projectId: PUBLIC_SANITY_PROJECT_ID,
       dataset: PUBLIC_SANITY_DATASET,

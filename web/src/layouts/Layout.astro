@@ -72,6 +72,14 @@ const AnnouncementContent = announcement
   ? (await render(announcement)).Content
   : null;
 
+// React stays out of the static production build. Both flags are replaced at
+// build time, so the import below is dropped when this is a public build.
+const editorBuild =
+  import.meta.env.DEV || import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === "true";
+const PreviewBridge = editorBuild
+  ? (await import("../components/preview/PreviewBridge.astro")).default
+  : null;
+
 let navLinks: ReturnType<typeof navLinksFromSettings> = [];
 try {
   const settings = await loadSiteSettings(preview);
@@ -121,16 +129,6 @@ try {
       )}
     </Nav>
     <slot />
-    {preview && (
-      <script>
-        import { enableVisualEditing } from "@sanity/visual-editing";
-
-        enableVisualEditing({
-          refresh: (payload) => {
-            if (payload.source === "mutation") window.location.reload();
-          },
-        });
-      </script>
-    )}
+    {PreviewBridge && preview && <PreviewBridge />}
   </body>
 </html>
