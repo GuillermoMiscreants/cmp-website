@@ -11,6 +11,7 @@ import {spacer} from './blocks/atoms/spacer'
 import {video} from './blocks/atoms/video'
 import {column} from './blocks/containers/column'
 import {columns} from './blocks/containers/columns'
+import {contentWrapper} from './blocks/containers/contentWrapper'
 import {section} from './blocks/containers/section'
 import {faq} from './blocks/sealed/faq'
 import {logoMarquee} from './blocks/sealed/logoMarquee'
@@ -27,6 +28,7 @@ export const schemaTypes = [
   section,
   columns,
   column,
+  contentWrapper,
   heading,
   eyebrow,
   richText,

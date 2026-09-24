@@ -1,7 +1,7 @@
 import {SquareIcon} from '@sanity/icons/Square'
 import {defineField, defineType} from 'sanity'
 import {cardBorder, cardStyle, iconName} from '../../../../web/src/lib/variants'
-import {alignField, listField, styleFieldset} from '../../fields/style'
+import {alignField, listField} from '../../fields/style'
 import {imageWithAlt} from '../../objects/imageWithAlt'
 
 export const card = defineType({
@@ -9,7 +9,6 @@ export const card = defineType({
   title: 'Card',
   type: 'object',
   icon: SquareIcon,
-  fieldsets: [styleFieldset],
   fields: [
     listField('style', 'Style', cardStyle, 'featured', 'Featured card or the icon stat card.'),
     defineField({
@@ -63,7 +62,7 @@ export const card = defineType({
       rows: 3,
       hidden: ({parent}) => parent?.style !== 'icon',
     }),
-    listField('icon', 'Icon', iconName, 'lucide:activity', 'Icon used by the icon stat card.', false),
+    listField('icon', 'Icon', iconName, 'lucide:activity', 'Icon used by the icon stat card.'),
     listField('border', 'Border', cardBorder, 'none', 'Border used by the featured card.'),
     alignField(),
   ],

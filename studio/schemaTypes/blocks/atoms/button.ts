@@ -1,14 +1,13 @@
 import {LinkIcon} from '@sanity/icons/Link'
 import {defineField, defineType} from 'sanity'
 import {buttonVariant} from '../../../../web/src/lib/variants'
-import {listField, styleFieldset} from '../../fields/style'
+import {listField} from '../../fields/style'
 
 export const button = defineType({
   name: 'button',
   title: 'Button',
   type: 'object',
   icon: LinkIcon,
-  fieldsets: [styleFieldset],
   fields: [
     defineField({
       name: 'label',
@@ -27,7 +26,6 @@ export const button = defineType({
       name: 'withArrow',
       title: 'Arrow',
       type: 'boolean',
-      fieldset: 'style',
       initialValue: true,
       description: 'Show the arrow the button component already draws.',
     }),

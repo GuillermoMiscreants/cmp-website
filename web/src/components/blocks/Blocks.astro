@@ -9,6 +9,7 @@ import Spacer from "./atoms/Spacer.astro";
 import Divider from "./atoms/Divider.astro";
 import CardGrid from "./atoms/CardGrid.astro";
 import Columns from "./containers/Columns.astro";
+import ContentWrapper from "./containers/ContentWrapper.astro";
 import type { Align } from "../../lib/variants";
 import type { PageBlock } from "../../lib/sanity/load";
 
@@ -48,6 +49,8 @@ const { blocks, preview, documentId, basePath, inheritedAlign = "left", eager = 
       <CardGrid {...shared} />
     ) : block._type === "columns" ? (
       <Columns {...shared} />
+    ) : block._type === "contentWrapper" ? (
+      <ContentWrapper {...shared} />
     ) : null;
   })
 }

@@ -11,9 +11,7 @@ const linkProjection = `{
 const imageProjection = `{
   ...,
   alt,
-  "dimensions": asset->metadata.dimensions,
-  "lqip": asset->metadata.lqip,
-  "url": asset->url
+  "dimensions": asset->metadata.dimensions
 }`;
 
 const buttonProjection = `{
@@ -56,6 +54,33 @@ const leafProjection = `
   }
 `;
 
+/**
+ * Columns can sit inside a column, and a content wrapper can sit inside either.
+ * Three levels covers a wrapper inside a column, including one wrapper nested in that wrapper.
+ */
+function contentProjection(depth: number): string {
+  if (depth <= 0) return leafProjection;
+  return `
+    ${leafProjection},
+    _type == "columns" => {
+      layout,
+      gap,
+      verticalAlign,
+      columns[]{
+        _key,
+        _type,
+        content[]{ ${contentProjection(depth - 1)} }
+      }
+    },
+    _type == "contentWrapper" => {
+      align,
+      paddingTop,
+      paddingBottom,
+      content[]{ ${contentProjection(depth - 1)} }
+    }
+  `;
+}
+
 export const pageBySlugQuery = defineQuery(`
   *[_type == "page" && slug.current == $slug][0]{
     _id,
@@ -73,21 +98,13 @@ export const pageBySlugQuery = defineQuery(`
       _type == "section" => {
         variant,
         background,
+        paddingTop,
+        paddingBottom,
         spacing,
         align,
         borderTop,
         content[]{
-          ${leafProjection},
-          _type == "columns" => {
-            layout,
-            gap,
-            verticalAlign,
-            columns[]{
-              _key,
-              _type,
-              content[]{ ${leafProjection} }
-            }
-          }
+          ${contentProjection(3)}
         }
       },
       _type == "logoMarquee" => {

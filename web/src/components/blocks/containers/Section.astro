@@ -1,7 +1,17 @@
 ---
 import SectionMain from "../../SectionMain.astro";
 import Blocks from "../Blocks.astro";
-import { alignClass, sectionVariantProps, type Align, type Background, type SectionVariant, type Spacing } from "../../../lib/variants";
+import {
+  alignClass,
+  sectionPadding,
+  sectionVariantProps,
+  spacing,
+  type Align,
+  type Background,
+  type SectionPadding,
+  type SectionVariant,
+  type Spacing,
+} from "../../../lib/variants";
 import { clean } from "../../../lib/sanity/clean";
 import { dataSanity } from "../../../lib/sanity/preview";
 import type { PageBlock } from "../../../lib/sanity/load";
@@ -14,14 +24,31 @@ interface Props {
 }
 
 const { block, preview, documentId, eager = false } = Astro.props;
+
+function isSectionPadding(value: string): value is SectionPadding {
+  return sectionPadding.some((item) => item.value === value);
+}
+
+function isSpacing(value: string): value is Spacing {
+  return spacing.some((item) => item.value === value);
+}
+
+/** Prefer the new edge field. Older sections stored one `spacing` value for both. */
+function sectionPad(value: string | null | undefined, legacy: string | null | undefined): Spacing {
+  const chosen = clean(value);
+  if (isSectionPadding(chosen)) return chosen;
+  const previous = clean(legacy);
+  if (isSpacing(previous)) return previous;
+  return "md";
+}
+
 const path = `sections[_key=="${block._key}"]`;
 const variant = clean(block.variant) as SectionVariant;
 const width = sectionVariantProps[variant] ?? sectionVariantProps.default;
 const bg = clean(block.background) as Background;
 const theme = bg === "dark" || bg === "brand" ? bg : undefined;
-const spacingValue = (["none", "xs", "sm", "md", "lg", "xl"] as const).includes(clean(block.spacing) as Spacing)
-  ? (clean(block.spacing) as Spacing)
-  : "md";
+const paddingTop = sectionPad(block.paddingTop, block.spacing);
+const paddingBottom = sectionPad(block.paddingBottom, block.spacing);
 const align = (["left", "center", "right"] as const).includes(clean(block.align) as Align)
   ? (clean(block.align) as Align)
   : "left";
@@ -29,7 +56,8 @@ const align = (["left", "center", "right"] as const).includes(clean(block.align)
 
 <SectionMain
   id={block._key}
-  padding={spacingValue}
+  paddingTop={paddingTop}
+  paddingBottom={paddingBottom}
   contentPadding={width.contentPadding}
   borderTop={Boolean(block.borderTop)}
   class:list={[bg === "muted" && "bg-panel-muted"]}

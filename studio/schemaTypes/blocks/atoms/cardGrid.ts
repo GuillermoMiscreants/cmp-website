@@ -1,14 +1,13 @@
 import {ThLargeIcon} from '@sanity/icons/ThLarge'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 import {cardColumns} from '../../../../web/src/lib/variants'
-import {listField, styleFieldset} from '../../fields/style'
+import {listField} from '../../fields/style'
 
 export const cardGrid = defineType({
   name: 'cardGrid',
   title: 'Card grid',
   type: 'object',
   icon: ThLargeIcon,
-  fieldsets: [styleFieldset],
   fields: [
     defineField({
       name: 'cards',

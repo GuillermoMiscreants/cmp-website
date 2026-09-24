@@ -1,7 +1,7 @@
 import {PlayIcon} from '@sanity/icons/Play'
 import {defineField, defineType} from 'sanity'
 import {imageAspect, videoMode} from '../../../../web/src/lib/variants'
-import {listField, styleFieldset} from '../../fields/style'
+import {listField} from '../../fields/style'
 import {imageWithAlt} from '../../objects/imageWithAlt'
 
 export const video = defineType({
@@ -9,7 +9,6 @@ export const video = defineType({
   title: 'Video',
   type: 'object',
   icon: PlayIcon,
-  fieldsets: [styleFieldset],
   fields: [
     defineField({
       name: 'url',

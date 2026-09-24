@@ -1,13 +1,12 @@
 import {UsersIcon} from '@sanity/icons/Users'
 import {defineArrayMember, defineField, defineType} from 'sanity'
-import {backgroundField, styleFieldset} from '../../fields/style'
+import {backgroundField} from '../../fields/style'
 
 export const logoMarquee = defineType({
   name: 'logoMarquee',
   title: 'Logo marquee',
   type: 'object',
   icon: UsersIcon,
-  fieldsets: [styleFieldset],
   fields: [
     defineField({
       name: 'label',

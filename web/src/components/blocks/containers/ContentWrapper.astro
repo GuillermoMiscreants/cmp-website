@@ -1,0 +1,38 @@
+---
+import Blocks from "../Blocks.astro";
+import { alignClass, paddingBottomClass, spacingClass, type Align } from "../../../lib/variants";
+import { clean, pick } from "../../../lib/sanity/clean";
+import { dataSanity } from "../../../lib/sanity/preview";
+import type { BlockRenderProps } from "../../../lib/sanity/load";
+
+type Props = BlockRenderProps;
+const { block, preview, documentId, path, inheritedAlign = "left", eager = false } = Astro.props;
+
+const chosen = clean(block.align);
+const align: Align = chosen === "left" || chosen === "center" || chosen === "right" ? chosen : inheritedAlign;
+const padTop = pick(spacingClass, block.paddingTop, "none");
+const padBottom = pick(paddingBottomClass, block.paddingBottom, "none");
+const content = block.content ?? [];
+---
+
+<div class:list={["flex w-full flex-col", alignClass[align]]} data-sanity={dataSanity(preview, documentId, path)}>
+  <div
+    class:list={[
+      "flex w-full flex-col",
+      alignClass[align],
+      padTop,
+      padBottom,
+      preview && content.length === 0 && "min-h-16",
+    ]}
+    data-sanity={dataSanity(preview, documentId, `${path}.content`)}
+  >
+    <Blocks
+      blocks={content}
+      preview={preview}
+      documentId={documentId}
+      basePath={`${path}.content`}
+      inheritedAlign={align}
+      eager={eager}
+    />
+  </div>
+</div>

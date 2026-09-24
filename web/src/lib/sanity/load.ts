@@ -7,8 +7,6 @@ import { pageBySlugQuery, siteSettingsQuery } from "./queries";
 
 export type SanityImage = {
   alt?: string | null;
-  url?: string | null;
-  lqip?: string | null;
   dimensions?: { width?: number; height?: number; aspectRatio?: number } | null;
   asset?: { _ref?: string } | null;
   crop?: unknown;
@@ -65,6 +63,9 @@ export type PageBlock = BlockBase & {
   button?: ButtonField | null;
   variant?: string | null;
   background?: string | null;
+  paddingTop?: string | null;
+  paddingBottom?: string | null;
+  /** Older sections stored one value for both edges. Used when top or bottom is unset. */
   spacing?: string | null;
   borderTop?: boolean | null;
   label?: string | null;

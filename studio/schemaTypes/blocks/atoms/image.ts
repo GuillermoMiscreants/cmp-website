@@ -1,7 +1,7 @@
 import {ImageIcon} from '@sanity/icons/Image'
 import {defineField, defineType} from 'sanity'
 import {imageAspect, imageRadius} from '../../../../web/src/lib/variants'
-import {listField, styleFieldset} from '../../fields/style'
+import {listField} from '../../fields/style'
 import {imageWithAlt} from '../../objects/imageWithAlt'
 
 // `image` is a reserved built-in type, so the block is stored as `imageBlock`.
@@ -11,7 +11,6 @@ export const imageBlock = defineType({
   title: 'Image',
   type: 'object',
   icon: ImageIcon,
-  fieldsets: [styleFieldset],
   fields: [
     imageWithAlt(),
     defineField({

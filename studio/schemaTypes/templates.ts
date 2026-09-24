@@ -24,7 +24,8 @@ function buttonValue(key: string, label: string, variant: 'primary' | 'secondary
 const heroCentered = {
   variant: 'default',
   background: 'none',
-  spacing: 'xl',
+  paddingTop: 'xl',
+  paddingBottom: 'xl',
   align: 'center',
   borderTop: false,
   content: [
@@ -49,7 +50,8 @@ const heroCentered = {
 const textCta = {
   variant: 'narrow',
   background: 'none',
-  spacing: 'md',
+  paddingTop: 'md',
+  paddingBottom: 'md',
   align: 'left',
   content: [
     {_type: 'heading', _key: 'heading', text: 'Text and a call to action', level: '2', size: 'h2', align: 'left'},
@@ -68,7 +70,8 @@ const textCta = {
 const featureGrid = {
   variant: 'wide',
   background: 'none',
-  spacing: 'sm',
+  paddingTop: 'sm',
+  paddingBottom: 'sm',
   align: 'left',
   borderTop: true,
   content: [
@@ -104,7 +107,8 @@ const featureGrid = {
 const iconStats = {
   variant: 'wide',
   background: 'none',
-  spacing: 'none',
+  paddingTop: 'sm',
+  paddingBottom: 'sm',
   align: 'left',
   content: [
     {
@@ -129,7 +133,8 @@ const iconStats = {
 const ctaBand = {
   variant: 'default',
   background: 'dark',
-  spacing: 'lg',
+  paddingTop: 'lg',
+  paddingBottom: 'lg',
   align: 'center',
   content: [
     {_type: 'heading', _key: 'heading', text: 'Ready to start?', level: '2', size: 'h2', align: 'center'},
@@ -140,7 +145,8 @@ const ctaBand = {
 const heroSplit = {
   variant: 'default',
   background: 'none',
-  spacing: 'lg',
+  paddingTop: 'lg',
+  paddingBottom: 'lg',
   align: 'left',
   content: [
     {

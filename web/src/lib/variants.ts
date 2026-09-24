@@ -26,6 +26,14 @@ export const spacing = [
   { title: "XL", value: "xl" },
 ] as const;
 
+/** Section top and bottom padding. Same rhythm as `section-pt-*` / `section-pb-*`. */
+export const sectionPadding = [
+  { title: "Small", value: "sm" },
+  { title: "Medium", value: "md" },
+  { title: "Large", value: "lg" },
+  { title: "X-Large", value: "xl" },
+] as const;
+
 export const headingLevel = [
   { title: "H1", value: "1" },
   { title: "H2", value: "2" },
@@ -145,6 +153,7 @@ type ValueOf<T extends readonly { value: string }[]> = T[number]["value"];
 export type SectionVariant = ValueOf<typeof sectionVariant>;
 export type Background = ValueOf<typeof background>;
 export type Spacing = ValueOf<typeof spacing>;
+export type SectionPadding = ValueOf<typeof sectionPadding>;
 export type HeadingLevel = ValueOf<typeof headingLevel>;
 export type HeadingSize = ValueOf<typeof headingSize>;
 export type TextSize = ValueOf<typeof textSize>;
@@ -203,7 +212,7 @@ export const textAlignClass: Record<Align, string> = {
   right: "text-right",
 };
 
-/** Spacer uses the SectionMain padding scale as empty padding, not a new size ramp. */
+/** Spacer and content-wrapper top padding. Same rhythm as `section-pt-*`. */
 export const spacingClass: Record<Spacing, string> = {
   none: "",
   xs: "section-pt-xs",
@@ -211,6 +220,16 @@ export const spacingClass: Record<Spacing, string> = {
   md: "section-pt-md",
   lg: "section-pt-lg",
   xl: "section-pt-xl",
+};
+
+/** Content-wrapper bottom padding. Same rhythm as `section-pb-*`. */
+export const paddingBottomClass: Record<Spacing, string> = {
+  none: "",
+  xs: "section-pb-xs",
+  sm: "section-pb-sm",
+  md: "section-pb-md",
+  lg: "section-pb-lg",
+  xl: "section-pb-xl",
 };
 
 export const dividerClass: Record<Tone, string> = {

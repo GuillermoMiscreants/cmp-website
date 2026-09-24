@@ -4,6 +4,7 @@ import {presentationTool, defineDocuments, defineLocations} from 'sanity/present
 import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
+import {deleteSelectedBlock} from './deleteSelectedBlock'
 
 const previewOrigin =
   (import.meta as {env?: Record<string, string | undefined>}).env?.SANITY_STUDIO_PREVIEW_ORIGIN ||
@@ -17,6 +18,7 @@ export default defineConfig({
   dataset: 'production',
 
   plugins: [
+    deleteSelectedBlock(),
     structureTool({structure}),
     presentationTool({
       allowOrigins: [

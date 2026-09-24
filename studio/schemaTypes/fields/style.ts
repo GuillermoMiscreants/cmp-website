@@ -1,13 +1,7 @@
 import {defineField} from 'sanity'
-import {align, background, spacing} from '../../../web/src/lib/variants'
+import {align, background, sectionPadding, spacing} from '../../../web/src/lib/variants'
 
 type Option = {title: string; value: string}
-
-export const styleFieldset = {
-  name: 'style',
-  title: 'Style',
-  options: {collapsible: true, collapsed: true},
-}
 
 export function listField(
   name: string,
@@ -15,7 +9,7 @@ export function listField(
   list: readonly Option[],
   initial: string,
   description?: string,
-  fieldset: string | false = 'style',
+  fieldset?: string,
 ) {
   return defineField({
     name,
@@ -26,14 +20,37 @@ export function listField(
     initialValue: initial,
     options: {
       list: list.map((item) => ({title: item.title, value: item.value})),
-      layout: 'radio',
-      direction: 'horizontal',
+      layout: 'dropdown',
     },
   })
 }
 
-export function alignField(description = 'Horizontal alignment.') {
-  return listField('align', 'Align', align, 'left', description)
+export function alignField(
+  description = 'Horizontal alignment.',
+  initial: string | null = 'left',
+) {
+  return defineField({
+    name: 'align',
+    title: 'Align',
+    type: 'string',
+    description,
+    ...(initial ? {initialValue: initial} : {}),
+    options: {
+      list: align.map((item) => ({title: item.title, value: item.value})),
+      layout: 'dropdown',
+    },
+  })
+}
+
+export function edgePaddingField(name: 'paddingTop' | 'paddingBottom', title: string) {
+  return listField(
+    name,
+    title,
+    spacing,
+    'none',
+    'Space inside this edge. None leaves the items against the wrapper.',
+    'padding',
+  )
 }
 
 export function backgroundField() {
@@ -46,13 +63,14 @@ export function backgroundField() {
   )
 }
 
-export function spacingField(initial: (typeof spacing)[number]['value'] = 'md') {
+export function sectionPaddingField(name: 'paddingTop' | 'paddingBottom', title: string) {
   return listField(
-    'spacing',
-    'Spacing',
-    spacing,
-    initial,
-    'Vertical padding, using the section rhythm already in the site.',
+    name,
+    title,
+    sectionPadding,
+    'md',
+    'Space inside this edge of the section, using the site spacing scale.',
+    'padding',
   )
 }
 

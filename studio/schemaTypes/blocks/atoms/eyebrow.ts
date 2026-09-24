@@ -1,14 +1,13 @@
 import {TagIcon} from '@sanity/icons/Tag'
 import {defineField, defineType} from 'sanity'
 import {tone} from '../../../../web/src/lib/variants'
-import {alignField, listField, styleFieldset} from '../../fields/style'
+import {alignField, listField} from '../../fields/style'
 
 export const eyebrow = defineType({
   name: 'eyebrow',
   title: 'Eyebrow',
   type: 'object',
   icon: TagIcon,
-  fieldsets: [styleFieldset],
   fields: [
     defineField({
       name: 'text',
@@ -16,7 +15,7 @@ export const eyebrow = defineType({
       type: 'string',
       validation: (rule) => rule.required(),
     }),
-    alignField(),
+    alignField('Leave empty to follow the section or content wrapper.', null),
     listField('tone', 'Tone', tone, 'muted', 'Color role for this label.'),
   ],
   preview: {

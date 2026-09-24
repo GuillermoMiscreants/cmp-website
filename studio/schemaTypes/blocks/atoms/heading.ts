@@ -1,14 +1,13 @@
 import {TextIcon} from '@sanity/icons/Text'
 import {defineField, defineType} from 'sanity'
 import {headingLevel, headingSize} from '../../../../web/src/lib/variants'
-import {alignField, listField, styleFieldset} from '../../fields/style'
+import {alignField, listField} from '../../fields/style'
 
 export const heading = defineType({
   name: 'heading',
   title: 'Heading',
   type: 'object',
   icon: TextIcon,
-  fieldsets: [styleFieldset],
   fields: [
     defineField({
       name: 'text',
@@ -30,7 +29,7 @@ export const heading = defineType({
       'h2',
       'Visual size only. Use Level for SEO and accessibility.',
     ),
-    alignField(),
+    alignField('Leave empty to follow the section or content wrapper.', null),
   ],
   preview: {
     select: {title: 'text', level: 'level', size: 'size'},

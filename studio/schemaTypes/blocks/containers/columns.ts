@@ -1,14 +1,13 @@
 import {SplitVerticalIcon} from '@sanity/icons/SplitVertical'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 import {columnsGap, columnsLayout, verticalAlign} from '../../../../web/src/lib/variants'
-import {listField, styleFieldset} from '../../fields/style'
+import {listField} from '../../fields/style'
 
 export const columns = defineType({
   name: 'columns',
   title: 'Columns',
   type: 'object',
   icon: SplitVerticalIcon,
-  fieldsets: [styleFieldset],
   fields: [
     defineField({
       name: 'columns',

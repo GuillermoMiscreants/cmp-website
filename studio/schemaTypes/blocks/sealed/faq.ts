@@ -1,13 +1,12 @@
 import {HelpCircleIcon} from '@sanity/icons/HelpCircle'
 import {defineArrayMember, defineField, defineType} from 'sanity'
-import {backgroundField, styleFieldset} from '../../fields/style'
+import {backgroundField} from '../../fields/style'
 
 export const faq = defineType({
   name: 'faq',
   title: 'FAQ',
   type: 'object',
   icon: HelpCircleIcon,
-  fieldsets: [styleFieldset],
   fields: [
     defineField({
       name: 'heading',

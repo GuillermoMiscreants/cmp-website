@@ -1,9 +1,10 @@
 import {BlockElementIcon} from '@sanity/icons/BlockElement'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 import {sectionVariant} from '../../../../web/src/lib/variants'
-import {alignField, backgroundField, insertMenu, listField, spacingField, styleFieldset} from '../../fields/style'
+import {alignField, backgroundField, insertMenu, listField, sectionPaddingField} from '../../fields/style'
 
-export const sectionContentMembers = [
+/** Blocks that can sit in a section, a column, or a content wrapper. */
+export const flowContentMembers = [
   defineArrayMember({type: 'eyebrow', name: 'eyebrow'}),
   defineArrayMember({type: 'heading', name: 'heading'}),
   defineArrayMember({type: 'richText', name: 'richText'}),
@@ -13,7 +14,12 @@ export const sectionContentMembers = [
   defineArrayMember({type: 'spacer', name: 'spacer'}),
   defineArrayMember({type: 'divider', name: 'divider'}),
   defineArrayMember({type: 'cardGrid', name: 'cardGrid'}),
+]
+
+export const sectionContentMembers = [
+  ...flowContentMembers,
   defineArrayMember({type: 'columns', name: 'columns'}),
+  defineArrayMember({type: 'contentWrapper', name: 'contentWrapper'}),
 ]
 
 export const section = defineType({
@@ -21,7 +27,7 @@ export const section = defineType({
   title: 'Section',
   type: 'object',
   icon: BlockElementIcon,
-  fieldsets: [styleFieldset],
+  fieldsets: [{name: 'padding', title: 'Padding', options: {columns: 2}}],
   fields: [
     defineField({
       name: 'content',
@@ -32,7 +38,7 @@ export const section = defineType({
         {name: 'text', title: 'Text', of: ['eyebrow', 'heading', 'richText']},
         {name: 'actions', title: 'Actions', of: ['buttonGroup']},
         {name: 'media', title: 'Media', of: ['imageBlock', 'video']},
-        {name: 'layout', title: 'Layout', of: ['spacer', 'divider', 'cardGrid', 'columns']},
+        {name: 'layout', title: 'Layout', of: ['spacer', 'divider', 'cardGrid', 'columns', 'contentWrapper']},
       ]),
       validation: (rule) => rule.required().min(1).error('Add at least one component to this section.'),
     }),
@@ -44,13 +50,13 @@ export const section = defineType({
       'Content width inside the page container. Narrow is a text column. Wide drops the inner padding.',
     ),
     backgroundField(),
-    spacingField(),
+    sectionPaddingField('paddingTop', 'Top'),
+    sectionPaddingField('paddingBottom', 'Bottom'),
     alignField('Default alignment for items in this section. An item can override it.'),
     defineField({
       name: 'borderTop',
       title: 'Top border',
       type: 'boolean',
-      fieldset: 'style',
       initialValue: false,
       description: 'Hairline along the top of the section.',
     }),

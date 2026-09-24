@@ -3,3 +3,49 @@ import PreviewEditing from "./PreviewEditing.tsx";
 ---
 
 <PreviewEditing client:only="react" />
+
+<style is:global>
+  /*
+    Presentation chrome only. The overlay ring, hover line, and drop marker
+    share one green so the block under the pointer reads as a single target.
+  */
+  .preview-guide {
+    background-color: #53924d;
+  }
+
+  /*
+    Remove sits in the hover label, beside the type name. No chip of its own —
+    the label is already the green tag, and this icon uses the label's white.
+  */
+  sanity-visual-editing [data-remove-block] {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    line-height: 0;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  sanity-visual-editing [data-remove-block]:hover {
+    opacity: 0.72;
+  }
+
+  sanity-visual-editing [data-remove-block] svg {
+    display: block;
+  }
+
+  sanity-visual-editing,
+  sanity-visual-editing :where(*) {
+    --card-focus-ring-color: #53924d !important;
+  }
+
+  sanity-visual-editing [style*="556bfc"] {
+    background: #53924d !important;
+  }
+</style>
