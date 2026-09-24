@@ -2,15 +2,20 @@
 import Layout from "../layouts/Layout.astro";
 import PageView from "../components/blocks/PageView.astro";
 import { loadPage } from "../lib/sanity/load";
+import { isPreview } from "../lib/sanity/preview";
 
-export const prerender = true;
+// Static on the production build. Server-rendered on the preview deployment.
+export const prerender = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED !== "true";
 
-const { page, settings } = await loadPage("home", false);
+const preview =
+  (import.meta.env.DEV || import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === "true") &&
+  isPreview(Astro.cookies);
+const { page, settings } = await loadPage("home", preview);
 ---
 
 {
   page ? (
-    <PageView page={page} settings={settings} />
+    <PageView page={page} settings={settings} preview={preview} />
   ) : (
     <Layout title="Home">
       <main id="main" class="container-page py-24">

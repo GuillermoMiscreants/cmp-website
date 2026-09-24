@@ -2,9 +2,11 @@
 import PageView from "../components/blocks/PageView.astro";
 import { loadPage } from "../lib/sanity/load";
 import { getClient } from "../lib/sanity/client";
+import { isPreview } from "../lib/sanity/preview";
 import { PAGE_SLUGS_QUERY } from "../lib/sanity/queries";
 
-export const prerender = true;
+// Static on the production build. Server-rendered on the preview deployment.
+export const prerender = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED !== "true";
 
 export async function getStaticPaths() {
   const client = getClient({ preview: false });
@@ -12,11 +14,14 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const { page, settings } = await loadPage(slug || "", false);
+const preview =
+  (import.meta.env.DEV || import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === "true") &&
+  isPreview(Astro.cookies);
+const { page, settings } = await loadPage(slug || "", preview);
 
 if (!page) {
   return new Response(null, { status: 404, statusText: "Not Found" });
 }
 ---
 
-<PageView page={page} settings={settings} />
+<PageView page={page} settings={settings} preview={preview} />

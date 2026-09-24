@@ -10,11 +10,18 @@ import cloudflare from '@astrojs/cloudflare';
 
 // astro.config.mjs runs before Astro loads env files, so PUBLIC_* is not on
 // import.meta.env yet. loadEnv reads the same variables the pages use.
-const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, PUBLIC_SANITY_STUDIO_URL } = loadEnv(
-  process.env.NODE_ENV ?? 'development',
-  process.cwd(),
-  '',
-);
+const {
+  PUBLIC_SANITY_PROJECT_ID,
+  PUBLIC_SANITY_DATASET,
+  PUBLIC_SANITY_STUDIO_URL,
+  PUBLIC_SANITY_VISUAL_EDITING_ENABLED: visualEditingFromFile,
+} = loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), '');
+
+// Production (`npm run build`) stays static. The preview deployment
+// (`npm run build:preview`) sets this and renders every page on the server.
+const visualEditing =
+  (process.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED ?? visualEditingFromFile) === 'true';
+const isDev = process.argv.includes('dev');
 
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
@@ -71,12 +78,39 @@ function demoRoutes() {
   };
 }
 
-// Published pages stay static (`output: 'static'` + getStaticPaths).
-// Preview routes and /api/preview set `prerender = false`, so the Cloudflare
-// adapter is required. imageService 'compile' keeps sharp at build time; the
-// adapter's default service would pass images through unoptimized.
+// Two deployments from this package:
+// - Production: `output: 'static'`, no adapter, no preview routes. Visitors
+//   get the HTML from the last build. A Sanity publish webhook rebuilds it.
+// - Preview: `PUBLIC_SANITY_VISUAL_EDITING_ENABLED=true` switches to
+//   `output: 'server'` and wrangler.preview.jsonc. Editors load that host
+//   from Presentation. Drafts render on request.
+// Local `astro dev` keeps the adapter so /api/preview can set the cookie.
+// imageService 'compile' keeps sharp at build time.
 // The contact-form Cloudflare action is still disabled (src/actions/
 // index.ts.disabled).
+
+/** Preview endpoints exist only on the dev server and the preview deployment. */
+function sanityPreviewRoutes() {
+  return {
+    name: 'sanity-preview-routes',
+    hooks: {
+      'astro:config:setup': ({ command, injectRoute }) => {
+        const enabled = command === 'dev' || visualEditing;
+        if (!enabled) return;
+        injectRoute({
+          pattern: '/api/preview/enable',
+          entrypoint: './src/preview/enable.ts',
+          prerender: false,
+        });
+        injectRoute({
+          pattern: '/api/preview/disable',
+          entrypoint: './src/preview/disable.ts',
+          prerender: false,
+        });
+      },
+    },
+  };
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -84,18 +118,27 @@ export default defineConfig({
   // here. Drives canonical URLs, og:url/og:image, JSON-LD @id values and the
   // sitemap.
   site: site.url,
-  output: 'static',
-  adapter: cloudflare({
-    // Compile images with sharp at build time. The adapter's default service
-    // passes images through unoptimized.
-    imageService: 'compile',
-    prerenderEnvironment: 'node',
-  }),
+  output: visualEditing ? 'server' : 'static',
+  adapter:
+    visualEditing || isDev
+      ? cloudflare({
+          // Compile images with sharp at build time. The adapter's default service
+          // passes images through unoptimized.
+          imageService: 'compile',
+          prerenderEnvironment: 'node',
+          configPath: visualEditing ? './wrangler.preview.jsonc' : undefined,
+        })
+      : undefined,
   env: {
     schema: {
       SANITY_API_READ_TOKEN: envField.string({
         context: 'server',
         access: 'secret',
+        optional: true,
+      }),
+      PUBLIC_SANITY_VISUAL_EDITING_ENABLED: envField.string({
+        context: 'client',
+        access: 'public',
         optional: true,
       }),
     },
@@ -136,6 +179,7 @@ export default defineConfig({
     icon(),
     mdx(),
     demoRoutes(),
+    sanityPreviewRoutes(),
     sitemap({
       filter: (page) => {
         const { pathname } = new URL(page);
@@ -146,6 +190,11 @@ export default defineConfig({
     }),
   ],
   vite: {
+    define: {
+      'import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED': JSON.stringify(
+        visualEditing ? 'true' : 'false',
+      ),
+    },
     plugins: [tailwindcss()],
     resolve: {
       // @iconify/utils imports the CommonJS `debug` package. The Cloudflare

@@ -10,6 +10,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:preview": "PUBLIC_SANITY_VISUAL_EDITING_ENABLED=true PUBLIC_SANITY_STUDIO_URL=https://www.sanity.io/@oRFUjdx6o/studio/l1bgj0ve324zdjj05msyfqkz astro build",
+    "deploy": "astro build && wrangler deploy -c wrangler.jsonc",
+    "deploy:preview": "npm run build:preview && wrangler deploy -c dist/server/wrangler.json",
     "preview": "astro preview",
     "typecheck": "astro check --minimumFailingSeverity warning",
     "//spellcheck": "Whole repo, not just src — every page, every doc. Advisory by design: --no-exit-code means it reports and never fails a build. Deliberately NOT part of `check`; see docs/rules/content.md [content.copy].",

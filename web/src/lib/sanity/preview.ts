@@ -39,28 +39,15 @@ export function isPreview(cookies: { get(name: string): { value: string } | unde
   return cookies.get(PREVIEW_COOKIE)?.value === "1";
 }
 
-/** Map a public or preview pathname onto the on-demand preview route. */
-export function toPreviewPath(pathname: string | undefined) {
-  const path = pathname && pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/";
-  if (path === "/preview" || path.startsWith("/preview/")) return path;
-  if (path === "/") return "/preview";
-  return `/preview${path}`;
-}
-
-/** Map a preview pathname back to the published URL. */
+/** Keep preview navigations on the same paths the public site uses. */
 export function toPublicPath(pathname: string) {
-  if (pathname === "/preview") return "/";
-  if (pathname.startsWith("/preview/")) {
-    const rest = pathname.slice("/preview/".length);
+  const path = pathname && pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/";
+  if (path === "/preview") return "/";
+  if (path.startsWith("/preview/")) {
+    const rest = path.slice("/preview/".length);
     return !rest || rest === "home" ? "/" : `/${rest}`;
   }
-  return pathname === "/home" ? "/" : pathname || "/";
-}
-
-export function slugFromParam(param: string | undefined) {
-  const value = param?.split("/")[0];
-  if (!value || value === "home") return "home";
-  return value;
+  return path === "/home" ? "/" : path || "/";
 }
 
 export function dataSanity(preview: boolean, id: string, path: string, type = "page") {

@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { urlSearchParamPreviewPathname } from "@sanity/preview-url-secret";
-import { expiredPartitionedPreviewCookie, previewCookieHeader, toPublicPath } from "../../../lib/sanity/preview";
+import { expiredPartitionedPreviewCookie, previewCookieHeader, toPublicPath } from "../lib/sanity/preview";
 
 export const prerender = false;
 

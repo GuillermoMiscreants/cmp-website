@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cmp-website-preview",
+  "compatibility_date": "2026-04-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // Server build. The Cloudflare adapter fills in `main` and the asset
+  // directory during `npm run build:preview`. Do not use this config for the
+  // public site — that deploy is static and uses wrangler.jsonc.
+  "workers_dev": true
+}

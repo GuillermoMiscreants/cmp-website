@@ -130,21 +130,6 @@ try {
             if (payload.source === "mutation") window.location.reload();
           },
         });
-
-        // Nav and content links point at published URLs. Leaving /preview
-        // drops the overlay, because only the preview routes load this script.
-        document.addEventListener("click", (event) => {
-          if (!(event.target instanceof Element)) return;
-          const anchor = event.target.closest("a");
-          if (!anchor || anchor.target === "_blank" || event.defaultPrevented) return;
-          const url = new URL(anchor.href, location.origin);
-          if (url.origin !== location.origin) return;
-          if (url.pathname === "/preview" || url.pathname.startsWith("/preview/")) return;
-          if (url.pathname.startsWith("/api/")) return;
-          event.preventDefault();
-          url.pathname = url.pathname === "/" ? "/preview" : `/preview${url.pathname}`;
-          location.assign(url.href);
-        });
       </script>
     )}
   </body>
