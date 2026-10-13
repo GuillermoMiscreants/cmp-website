@@ -45,8 +45,27 @@ function DeleteSelectedBlock() {
         new URL(frame.src).origin,
       )
     }
+    // Studio binds Cmd/Ctrl+K to its document search. While Presentation is open,
+    // hand the shortcut to the preview so it opens the block picker instead.
+    const onPicker = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey) return
+      if (event.key.toLowerCase() !== 'k') return
+      const frame = previewFrame()
+      if (!frame?.contentWindow) return
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.repeat) return
+      frame.contentWindow.postMessage(
+        {source: 'cmp-preview', type: 'toggle-picker'},
+        new URL(frame.src).origin,
+      )
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('keydown', onPicker, true)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('keydown', onPicker, true)
+    }
   }, [])
   return null
 }
@@ -60,7 +79,7 @@ function Layout(props: LayoutProps) {
   )
 }
 
-/** Delete removes the block clicked in Presentation, unless a property field has focus. */
+/** Delete removes the block clicked in Presentation, unless a property field has focus. Cmd/Ctrl+K opens the block picker. */
 export const deleteSelectedBlock = definePlugin({
   name: 'delete-selected-block',
   studio: {

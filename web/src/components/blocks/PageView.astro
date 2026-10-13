@@ -22,11 +22,20 @@ const title = clean(page.seo?.title) || clean(page.title) || clean(settings?.sit
 const description = clean(page.seo?.description) || undefined;
 const image = page.seo?.ogImage?.asset ? urlFor(page.seo.ogImage).width(1200).url() : undefined;
 const isHome = clean(page.slug) === "home";
+const authoredJsonLd = (() => {
+  try {
+    const parsed = page.jsonLd?.trim() ? JSON.parse(page.jsonLd) : null;
+    return parsed && typeof parsed === "object" ? (Array.isArray(parsed) ? parsed : [parsed]) : [];
+  } catch {
+    return [];
+  }
+})();
+const jsonLd = [...(isHome ? [homepageSchema] : []), ...authoredJsonLd];
 const sections = page.sections ?? [];
 const legacyBody = sections.length === 0 && Array.isArray(page.legacyBody) ? page.legacyBody : [];
 ---
 
-<Layout title={title} description={description} image={image} preview={preview} jsonLd={isHome ? homepageSchema : undefined}>
+<Layout title={title} description={description} image={image} preview={preview} jsonLd={jsonLd.length ? jsonLd : undefined}>
   <main id="main">
     {
       sections.map((section, index) =>

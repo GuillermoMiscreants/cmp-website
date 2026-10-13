@@ -15,6 +15,7 @@ import {
   type PaletteType,
 } from "./inserts";
 import { LayersPanel } from "./layers";
+import { BlockPicker } from "./picker";
 import { installReorder } from "./reorder";
 
 /** PreviewEditing dispatches this after swapping the page landmark. */
@@ -239,84 +240,48 @@ const insertApi = {
 
 type PlusPlace = { top: number; left: number; width: number };
 
+/** Inserts a new block after the anchor. Returns an error message, or null when the patch was sent. */
+function insertBlock(anchor: Anchor, intoSection: boolean, type: PaletteType): string | null {
+  const failure = "Couldn't add that block.";
+  const getDocument = insertApi.getDocument;
+  if (!getDocument) return failure;
+  const documentId = stegaClean(anchor.id);
+  const arrayPath = stegaClean(anchor.target.arrayPath);
+  const afterKey = anchor.target.afterKey ? stegaClean(anchor.target.afterKey) : null;
+  if (intoSection && (arrayPath === "sections" || type === "section" || !arrayPath.endsWith(".content"))) {
+    return failure;
+  }
+  try {
+    const doc = getDocument(documentId);
+    const block = createBlock(type);
+    const placed = afterKey ? insertAt(block, "after", { _key: afterKey }) : insertAt(block, "after", -1);
+    void Promise.resolve(doc.patch(() => [at(arrayPath, placed)])).catch((cause: unknown) => {
+      console.error("Could not insert block.", cause);
+    });
+    return null;
+  } catch (cause) {
+    console.error("Could not insert block.", cause);
+    return failure;
+  }
+}
+
+/**
+ * The plus that follows the block under the pointer. It stays mounted while
+ * the HUD unmounts, and opens the block picker instead of a menu.
+ */
 function InsertControl({
-  anchor,
   plus,
   label,
   caption,
-  onEngage,
-  onMenuChange,
+  onOpen,
 }: {
-  anchor: Anchor;
   plus: PlusPlace;
   label: string;
   caption?: string;
-  onEngage: (active: boolean) => void;
-  onMenuChange?: (open: boolean) => void;
+  onOpen: () => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const openRef = useRef(false);
-  const closeTimer = useRef(0);
-  const items = menus[anchor.target.scope];
-
-  useEffect(() => {
-    return () => {
-      window.clearTimeout(closeTimer.current);
-      if (!openRef.current) return;
-      openRef.current = false;
-      onEngage(false);
-      onMenuChange?.(false);
-    };
-  }, [onEngage, onMenuChange]);
-
-  const setMenu = (next: boolean) => {
-    window.clearTimeout(closeTimer.current);
-    if (openRef.current === next) return;
-    openRef.current = next;
-    setOpen(next);
-    onEngage(next);
-    onMenuChange?.(next);
-  };
-
   const hold = (event: { stopPropagation(): void }) => {
     event.stopPropagation();
-  };
-
-  const choose = (type: PaletteType, event: { preventDefault(): void; stopPropagation(): void }) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setMenu(false);
-    insert(type);
-  };
-
-  const insert = (type: PaletteType) => {
-    setError(null);
-    const getDocument = insertApi.getDocument;
-    if (!getDocument) {
-      setError("Couldn't add that block.");
-      return;
-    }
-    const documentId = stegaClean(anchor.id);
-    const arrayPath = stegaClean(anchor.target.arrayPath);
-    const afterKey = anchor.target.afterKey ? stegaClean(anchor.target.afterKey) : null;
-    const intoSection = Boolean(caption);
-    if (intoSection && (arrayPath === "sections" || type === "section" || !arrayPath.endsWith(".content"))) {
-      setError("Couldn't add that block.");
-      return;
-    }
-    try {
-      const doc = getDocument(documentId);
-      const block = createBlock(type);
-      const placed = afterKey ? insertAt(block, "after", { _key: afterKey }) : insertAt(block, "after", -1);
-      void Promise.resolve(doc.patch(() => [at(arrayPath, placed)])).catch((cause: unknown) => {
-        console.error("Could not insert block.", cause);
-        setError("Couldn't add that block.");
-      });
-    } catch (cause) {
-      console.error("Could not insert block.", cause);
-      setError("Couldn't add that block.");
-    }
   };
 
   return (
@@ -333,60 +298,28 @@ function InsertControl({
         pointerEvents: "none",
       }}
     >
-        <div aria-hidden="true" className="preview-guide absolute inset-x-0 top-1/2 h-px -translate-y-1/2" />
-        <div
-          className="relative flex flex-col items-center"
-          style={{ pointerEvents: "auto" }}
-          onPointerEnter={() => window.clearTimeout(closeTimer.current)}
-          onPointerLeave={() => {
-            window.clearTimeout(closeTimer.current);
-            closeTimer.current = window.setTimeout(() => setMenu(false), 200);
+      <div aria-hidden="true" className="preview-guide absolute inset-x-0 top-1/2 h-px -translate-y-1/2" />
+      <div className="relative flex flex-col items-center" style={{ pointerEvents: "auto" }}>
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          aria-label={label}
+          className={
+            caption
+              ? "flex h-7 items-center gap-1 rounded-full border border-stroke bg-panel px-2.5 text-body-xsm text-fg hover:bg-panel-muted"
+              : "flex size-7 items-center justify-center rounded-full border border-stroke bg-panel text-fg hover:bg-panel-muted"
+          }
+          onPointerDown={hold}
+          onClick={(event) => {
+            hold(event);
+            onOpen();
           }}
         >
-          <button
-            type="button"
-            aria-expanded={open}
-            aria-label={label}
-            className={
-              caption
-                ? "flex h-7 items-center gap-1 rounded-full border border-stroke bg-panel px-2.5 text-body-xsm text-fg hover:bg-panel-muted"
-                : "flex size-7 items-center justify-center rounded-full border border-stroke bg-panel text-fg hover:bg-panel-muted"
-            }
-            onPointerDown={hold}
-            onClick={(event) => {
-              hold(event);
-              setMenu(!openRef.current);
-              setError(null);
-            }}
-          >
-            <span aria-hidden="true">+</span>
-            {caption}
-          </button>
-          {open ? (
-            <div className="absolute bottom-full left-1/2 z-10 -translate-x-1/2 pb-1">
-              <div
-                role="menu"
-                aria-label={label}
-                className="flex max-w-xs flex-wrap justify-center gap-1 rounded-sm border border-stroke bg-panel p-1"
-              >
-                {items.map((item) => (
-                  <button
-                    key={item.type}
-                    type="button"
-                    role="menuitem"
-                    className="rounded-sm px-2 py-1 text-body-xsm text-fg hover:bg-panel-muted"
-                    onPointerDown={(event) => choose(item.type, event)}
-                    onClick={hold}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-          {error ? <span className="absolute top-full mt-1 px-2 py-1 text-body-xsm text-fg">{error}</span> : null}
-        </div>
+          <span aria-hidden="true">+</span>
+          {caption}
+        </button>
       </div>
+    </div>
   );
 }
 
@@ -399,7 +332,9 @@ function InsertHandle() {
   const [anchor, setAnchor] = useState<Anchor | null>(null);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [insidePlace, setInsidePlace] = useState<PlusPlace | null>(null);
-  const [contentMenu, setContentMenu] = useState(false);
+  const [picker, setPicker] = useState<{ anchor: Anchor; intoSection: boolean } | null>(null);
+  const [pickerError, setPickerError] = useState<string | null>(null);
+  const lastAnchor = useRef<Anchor | null>(null);
   const engaged = useRef(0);
   const onEngage = useRef((active: boolean) => {
     engaged.current = Math.max(0, engaged.current + (active ? 1 : -1));
@@ -452,11 +387,85 @@ function InsertHandle() {
     };
   }, [anchor]);
 
-  if (!insertApi.presentation || !anchor || !rect || rect.width < 1) return null;
+  useEffect(() => {
+    if (anchor) lastAnchor.current = anchor;
+  }, [anchor]);
 
-  const inside = sectionInterior(anchor);
-  const addLabel =
-    anchor.target.scope === "page"
+  const openPicker = (target: Anchor, intoSection: boolean) => {
+    setPickerError(null);
+    setPicker({ anchor: target, intoSection });
+  };
+
+  useEffect(() => {
+    if (!picker) return;
+    onEngage(true);
+    return () => onEngage(false);
+  }, [picker, onEngage]);
+
+  const anchorRef = useRef<Anchor | null>(null);
+  anchorRef.current = anchor;
+  const pickerOpen = useRef(false);
+  pickerOpen.current = picker !== null;
+
+  useEffect(() => {
+    const toggle = () => {
+      if (!insertApi.presentation) return;
+      if (pickerOpen.current) {
+        setPicker(null);
+        return;
+      }
+      const fallback = lastAnchor.current?.element.isConnected ? lastAnchor.current : null;
+      const target = anchorRef.current ?? fallback;
+      if (!target) return;
+      const interior = sectionInterior(target);
+      setPickerError(null);
+      setPicker(interior ? { anchor: interior, intoSection: true } : { anchor: target, intoSection: false });
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.altKey || event.key.toLowerCase() !== "k") return;
+      if (!insertApi.presentation) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.repeat) toggle();
+    };
+    /** Studio owns Cmd/Ctrl+K while it has focus and forwards it here. */
+    const onMessage = (event: MessageEvent) => {
+      if (window.parent === window || event.source !== window.parent) return;
+      const data = event.data;
+      if (!data || data.source !== "cmp-preview" || data.type !== "toggle-picker") return;
+      toggle();
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("message", onMessage);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("message", onMessage);
+    };
+  }, [version]);
+
+  if (!insertApi.presentation) return null;
+
+  const pickerView = picker ? (
+    <div data-theme="dark" data-insert-anchor="" className="bp-root">
+      <BlockPicker
+        items={menus[picker.anchor.target.scope]}
+        title={picker.intoSection ? "Add content" : "Add block"}
+        error={pickerError}
+        onClose={() => setPicker(null)}
+        onChoose={(type) => {
+          const failure = insertBlock(picker.anchor, picker.intoSection, type);
+          if (failure) setPickerError(failure);
+          else setPicker(null);
+        }}
+      />
+    </div>
+  ) : null;
+
+  const inside = anchor ? sectionInterior(anchor) : null;
+  const showControls = anchor && rect && rect.width >= 1;
+  const addLabel = !anchor
+    ? ""
+    : anchor.target.scope === "page"
       ? "Add section below"
       : !anchor.target.afterKey && anchor.target.scope === "wrapper"
         ? "Add inside wrapper"
@@ -464,26 +473,24 @@ function InsertHandle() {
 
   return (
     <>
-      {contentMenu ? null : (
+      {showControls ? (
         <InsertControl
           key={`${anchor.target.scope}:${anchor.target.arrayPath}:${anchor.target.afterKey ?? ""}`}
-          anchor={anchor}
           plus={{ top: rect.bottom, left: rect.left, width: rect.width }}
           label={addLabel}
-          onEngage={onEngage}
+          onOpen={() => openPicker(anchor, false)}
         />
-      )}
-      {inside && insidePlace ? (
+      ) : null}
+      {showControls && inside && insidePlace ? (
         <InsertControl
           key={inside.target.arrayPath}
-          anchor={inside}
           plus={insidePlace}
           label="Add inside section"
           caption="Add content"
-          onEngage={onEngage}
-          onMenuChange={setContentMenu}
+          onOpen={() => openPicker(inside, true)}
         />
       ) : null}
+      {pickerView}
     </>
   );
 }

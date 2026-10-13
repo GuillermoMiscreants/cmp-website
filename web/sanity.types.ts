@@ -54,11 +54,9 @@ export type LogoMarquee = {
 
 export type CardGrid = {
   _type: "cardGrid";
-  cards?: Array<
-    {
-      _key: string;
-    } & Card
-  >;
+  cards?: Array<{
+    _key: string;
+  } & Card>;
   columns?: "2" | "3" | "4" | "5";
 };
 
@@ -79,16 +77,7 @@ export type Card = {
   button?: Button;
   header?: string;
   body?: string;
-  icon?:
-    | "lucide:activity"
-    | "lucide:shield-check"
-    | "lucide:server"
-    | "lucide:headphones"
-    | "lucide:life-buoy"
-    | "lucide:layers"
-    | "lucide:database"
-    | "lucide:zap"
-    | "lucide:settings-2";
+  icon?: "lucide:activity" | "lucide:shield-check" | "lucide:server" | "lucide:headphones" | "lucide:life-buoy" | "lucide:layers" | "lucide:database" | "lucide:zap" | "lucide:settings-2";
   border?: "all" | "y" | "x" | "none";
   align?: "left" | "center" | "right";
 };
@@ -135,11 +124,9 @@ export type ImageBlock = {
 
 export type ButtonGroup = {
   _type: "buttonGroup";
-  buttons?: Array<
-    {
-      _key: string;
-    } & Button
-  >;
+  buttons?: Array<{
+    _key: string;
+  } & Button>;
   align?: "left" | "center" | "right";
 };
 
@@ -171,12 +158,7 @@ export type RichText = {
     _type: "block";
     _key: string;
   }>;
-  size?:
-    | "text-body-xl"
-    | "text-body-lg"
-    | "text-body-md"
-    | "text-body-sm"
-    | "text-body-xsm";
+  size?: "text-body-xl" | "text-body-lg" | "text-body-md" | "text-body-sm" | "text-body-xsm";
   tone?: "default" | "muted" | "inverse";
   align?: "left" | "center" | "right";
 };
@@ -196,43 +178,66 @@ export type Heading = {
   align?: "left" | "center" | "right";
 };
 
+export type ContentWrapper = {
+  _type: "contentWrapper";
+  content?: Array<{
+    _key: string;
+  } & Eyebrow | {
+    _key: string;
+  } & Heading | {
+    _key: string;
+  } & RichText | {
+    _key: string;
+  } & ButtonGroup | {
+    _key: string;
+  } & ImageBlock | {
+    _key: string;
+  } & Video | {
+    _key: string;
+  } & Spacer | {
+    _key: string;
+  } & Divider | {
+    _key: string;
+  } & CardGrid | {
+    _key: string;
+  } & ContentWrapper>;
+  align?: "left" | "center" | "right";
+  paddingTop?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
+  paddingBottom?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
+};
+
 export type Column = {
   _type: "column";
-  content?: Array<
-    | ({
-        _key: string;
-      } & Eyebrow)
-    | ({
-        _key: string;
-      } & Heading)
-    | ({
-        _key: string;
-      } & RichText)
-    | ({
-        _key: string;
-      } & ButtonGroup)
-    | ({
-        _key: string;
-      } & ImageBlock)
-    | ({
-        _key: string;
-      } & Video)
-    | ({
-        _key: string;
-      } & Spacer)
-    | ({
-        _key: string;
-      } & Divider)
-  >;
+  content?: Array<{
+    _key: string;
+  } & Eyebrow | {
+    _key: string;
+  } & Heading | {
+    _key: string;
+  } & RichText | {
+    _key: string;
+  } & ButtonGroup | {
+    _key: string;
+  } & ImageBlock | {
+    _key: string;
+  } & Video | {
+    _key: string;
+  } & Spacer | {
+    _key: string;
+  } & Divider | {
+    _key: string;
+  } & CardGrid | {
+    _key: string;
+  } & Columns | {
+    _key: string;
+  } & ContentWrapper>;
 };
 
 export type Columns = {
   _type: "columns";
-  columns?: Array<
-    {
-      _key: string;
-    } & Column
-  >;
+  columns?: Array<{
+    _key: string;
+  } & Column>;
   layout?: "1-1" | "1-1-1" | "2-1" | "1-2" | "1-1-1-1";
   gap?: "sm" | "md" | "lg";
   verticalAlign?: "top" | "center" | "bottom";
@@ -240,41 +245,33 @@ export type Columns = {
 
 export type Section = {
   _type: "section";
-  content?: Array<
-    | ({
-        _key: string;
-      } & Eyebrow)
-    | ({
-        _key: string;
-      } & Heading)
-    | ({
-        _key: string;
-      } & RichText)
-    | ({
-        _key: string;
-      } & ButtonGroup)
-    | ({
-        _key: string;
-      } & ImageBlock)
-    | ({
-        _key: string;
-      } & Video)
-    | ({
-        _key: string;
-      } & Spacer)
-    | ({
-        _key: string;
-      } & Divider)
-    | ({
-        _key: string;
-      } & CardGrid)
-    | ({
-        _key: string;
-      } & Columns)
-  >;
+  content?: Array<{
+    _key: string;
+  } & Eyebrow | {
+    _key: string;
+  } & Heading | {
+    _key: string;
+  } & RichText | {
+    _key: string;
+  } & ButtonGroup | {
+    _key: string;
+  } & ImageBlock | {
+    _key: string;
+  } & Video | {
+    _key: string;
+  } & Spacer | {
+    _key: string;
+  } & Divider | {
+    _key: string;
+  } & CardGrid | {
+    _key: string;
+  } & Columns | {
+    _key: string;
+  } & ContentWrapper>;
   variant?: "default" | "narrow" | "wide";
   background?: "none" | "muted" | "dark" | "brand";
-  spacing?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
+  paddingTop?: "sm" | "md" | "lg" | "xl";
+  paddingBottom?: "sm" | "md" | "lg" | "xl";
   align?: "left" | "center" | "right";
   borderTop?: boolean;
 };
@@ -359,35 +356,26 @@ export type Page = {
   title?: string;
   slug?: Slug;
   seo?: Seo;
-  sections?: Array<
-    | ({
-        _key: string;
-      } & Section)
-    | ({
-        _key: string;
-      } & Section)
-    | ({
-        _key: string;
-      } & Section)
-    | ({
-        _key: string;
-      } & Section)
-    | ({
-        _key: string;
-      } & Section)
-    | ({
-        _key: string;
-      } & Section)
-    | ({
-        _key: string;
-      } & Section)
-    | ({
-        _key: string;
-      } & LogoMarquee)
-    | ({
-        _key: string;
-      } & Faq)
-  >;
+  jsonLd?: string;
+  sections?: Array<{
+    _key: string;
+  } & Section | {
+    _key: string;
+  } & Section | {
+    _key: string;
+  } & Section | {
+    _key: string;
+  } & Section | {
+    _key: string;
+  } & Section | {
+    _key: string;
+  } & Section | {
+    _key: string;
+  } & Section | {
+    _key: string;
+  } & LogoMarquee | {
+    _key: string;
+  } & Faq>;
 };
 
 export type Slug = {
@@ -493,448 +481,46 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type AllSanitySchemaTypes =
-  | Faq
-  | SanityImageAssetReference
-  | LogoMarquee
-  | CardGrid
-  | Card
-  | Divider
-  | Spacer
-  | Video
-  | ImageBlock
-  | ButtonGroup
-  | Button
-  | RichText
-  | Eyebrow
-  | Heading
-  | Column
-  | Columns
-  | Section
-  | PageReference
-  | Link
-  | Seo
-  | SiteSettings
-  | SanityImageCrop
-  | SanityImageHotspot
-  | Page
-  | Slug
-  | SanityImagePaletteSwatch
-  | SanityImagePalette
-  | SanityImageDimensions
-  | SanityImageMetadata
-  | SanityFileAsset
-  | SanityAssetSourceData
-  | SanityImageAsset
-  | Geopoint;
-
-// Source: ../web/src/lib/sanity/queries.ts
-// Variable: pageBySlugQuery
-// Query: *[_type == "page" && slug.current == $slug][0]{    _id,    title,    "slug": slug.current,    seo{      title,      description,      ogImage{  ...,  alt,  "dimensions": asset->metadata.dimensions,  "lqip": asset->metadata.lqip,  "url": asset->url}    },    "legacyBody": body,    sections[]{      _key,      _type,      _type == "section" => {        variant,        background,        spacing,        align,        borderTop,        content[]{            _key,  _type,  _type == "heading" => { text, level, size, align },  _type == "eyebrow" => { text, align, tone },  _type == "richText" => { body, size, tone, align },  _type == "buttonGroup" => { align, buttons[]{  _key,  _type,  label,  variant,  withArrow,  link{  type,  openInNewTab,  anchor,  external,  internal->{ "slug": slug.current }}} },  _type == "imageBlock" => { caption, aspect, radius, image{  ...,  alt,  "dimensions": asset->metadata.dimensions,  "lqip": asset->metadata.lqip,  "url": asset->url} },  _type == "video" => { url, aspect, mode, poster{  ...,  alt,  "dimensions": asset->metadata.dimensions,  "lqip": asset->metadata.lqip,  "url": asset->url} },  _type == "spacer" => { size },  _type == "divider" => { tone },  _type == "cardGrid" => {    columns,    cards[]{      _key,      _type,      style,      eyebrow,      title,      description,      header,      body,      icon,      border,      align,      image{  ...,  alt,  "dimensions": asset->metadata.dimensions,  "lqip": asset->metadata.lqip,  "url": asset->url},      button{  _key,  _type,  label,  variant,  withArrow,  link{  type,  openInNewTab,  anchor,  external,  internal->{ "slug": slug.current }}}    }  },          _type == "columns" => {            layout,            gap,            verticalAlign,            columns[]{              _key,              _type,              content[]{   _key,  _type,  _type == "heading" => { text, level, size, align },  _type == "eyebrow" => { text, align, tone },  _type == "richText" => { body, size, tone, align },  _type == "buttonGroup" => { align, buttons[]{  _key,  _type,  label,  variant,  withArrow,  link{  type,  openInNewTab,  anchor,  external,  internal->{ "slug": slug.current }}} },  _type == "imageBlock" => { caption, aspect, radius, image{  ...,  alt,  "dimensions": asset->metadata.dimensions,  "lqip": asset->metadata.lqip,  "url": asset->url} },  _type == "video" => { url, aspect, mode, poster{  ...,  alt,  "dimensions": asset->metadata.dimensions,  "lqip": asset->metadata.lqip,  "url": asset->url} },  _type == "spacer" => { size },  _type == "divider" => { tone },  _type == "cardGrid" => {    columns,    cards[]{      _key,      _type,      style,      eyebrow,      title,      description,      header,      body,      icon,      border,      align,      image{  ...,  alt,  "dimensions": asset->metadata.dimensions,  "lqip": asset->metadata.lqip,  "url": asset->url},      button{  _key,  _type,  label,  variant,  withArrow,  link{  type,  openInNewTab,  anchor,  external,  internal->{ "slug": slug.current }}}    }  } }            }          }        }      },      _type == "logoMarquee" => {        label,        background,        logos[]{  ...,  alt,  "dimensions": asset->metadata.dimensions,  "lqip": asset->metadata.lqip,  "url": asset->url}      },      _type == "faq" => {        heading,        intro,        closePrevious,        openByDefault,        background,        items[]{ _key, question, answer }      }    }  }
-export type PageBySlugQueryResult = {
-  _id: string;
-  title: string | null;
-  slug: string | null;
-  seo: {
-    title: string | null;
-    description: string | null;
-    ogImage: {
-      asset?: SanityImageAssetReference;
-      media?: unknown;
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      alt: string | null;
-      _type: "image";
-      dimensions: SanityImageDimensions | null;
-      lqip: string | null;
-      url: string | null;
-    } | null;
-  } | null;
-  legacyBody: null;
-  sections: Array<
-    | {
-        _key: string;
-        _type: "faq";
-        heading: string | null;
-        intro: string | null;
-        closePrevious: boolean | null;
-        openByDefault: number | null;
-        background: "brand" | "dark" | "muted" | "none" | null;
-        items: Array<{
-          _key: string;
-          question: string | null;
-          answer: string | null;
-        }> | null;
-      }
-    | {
-        _key: string;
-        _type: "logoMarquee";
-        label: string | null;
-        background: "brand" | "dark" | "muted" | "none" | null;
-        logos: Array<{
-          asset?: SanityImageAssetReference;
-          media?: unknown;
-          hotspot?: SanityImageHotspot;
-          crop?: SanityImageCrop;
-          alt: string | null;
-          _type: "logo";
-          _key: string;
-          dimensions: SanityImageDimensions | null;
-          lqip: string | null;
-          url: string | null;
-        }> | null;
-      }
-    | {
-        _key: string;
-        _type: "section";
-        variant: "default" | "narrow" | "wide" | null;
-        background: "brand" | "dark" | "muted" | "none" | null;
-        spacing: "lg" | "md" | "none" | "sm" | "xl" | "xs" | null;
-        align: "center" | "left" | "right" | null;
-        borderTop: boolean | null;
-        content: Array<
-          | {
-              _key: string;
-              _type: "buttonGroup";
-              align: "center" | "left" | "right" | null;
-              buttons: Array<{
-                _key: string;
-                _type: "button";
-                label: string | null;
-                variant: "primary" | "secondary" | "tertiary" | null;
-                withArrow: boolean | null;
-                link: {
-                  type: "external" | "internal" | null;
-                  openInNewTab: boolean | null;
-                  anchor: string | null;
-                  external: string | null;
-                  internal: {
-                    slug: string | null;
-                  } | null;
-                } | null;
-              }> | null;
-            }
-          | {
-              _key: string;
-              _type: "cardGrid";
-              columns: "2" | "3" | "4" | "5" | null;
-              cards: Array<{
-                _key: string;
-                _type: "card";
-                style: "featured" | "icon" | null;
-                eyebrow: string | null;
-                title: string | null;
-                description: string | null;
-                header: string | null;
-                body: string | null;
-                icon:
-                  | "lucide:activity"
-                  | "lucide:database"
-                  | "lucide:headphones"
-                  | "lucide:layers"
-                  | "lucide:life-buoy"
-                  | "lucide:server"
-                  | "lucide:settings-2"
-                  | "lucide:shield-check"
-                  | "lucide:zap"
-                  | null;
-                border: "all" | "none" | "x" | "y" | null;
-                align: "center" | "left" | "right" | null;
-                image: {
-                  asset?: SanityImageAssetReference;
-                  media?: unknown;
-                  hotspot?: SanityImageHotspot;
-                  crop?: SanityImageCrop;
-                  alt: string | null;
-                  _type: "image";
-                  dimensions: SanityImageDimensions | null;
-                  lqip: string | null;
-                  url: string | null;
-                } | null;
-                button: {
-                  _key: null;
-                  _type: "button";
-                  label: string | null;
-                  variant: "primary" | "secondary" | "tertiary" | null;
-                  withArrow: boolean | null;
-                  link: {
-                    type: "external" | "internal" | null;
-                    openInNewTab: boolean | null;
-                    anchor: string | null;
-                    external: string | null;
-                    internal: {
-                      slug: string | null;
-                    } | null;
-                  } | null;
-                } | null;
-              }> | null;
-            }
-          | {
-              _key: string;
-              _type: "columns";
-              layout: "1-1-1-1" | "1-1-1" | "1-1" | "1-2" | "2-1" | null;
-              gap: "lg" | "md" | "sm" | null;
-              verticalAlign: "bottom" | "center" | "top" | null;
-              columns: Array<{
-                _key: string;
-                _type: "column";
-                content: Array<
-                  | {
-                      _key: string;
-                      _type: "buttonGroup";
-                      align: "center" | "left" | "right" | null;
-                      buttons: Array<{
-                        _key: string;
-                        _type: "button";
-                        label: string | null;
-                        variant: "primary" | "secondary" | "tertiary" | null;
-                        withArrow: boolean | null;
-                        link: {
-                          type: "external" | "internal" | null;
-                          openInNewTab: boolean | null;
-                          anchor: string | null;
-                          external: string | null;
-                          internal: {
-                            slug: string | null;
-                          } | null;
-                        } | null;
-                      }> | null;
-                    }
-                  | {
-                      _key: string;
-                      _type: "divider";
-                      tone: "default" | "inverse" | "muted" | null;
-                    }
-                  | {
-                      _key: string;
-                      _type: "eyebrow";
-                      text: string | null;
-                      align: "center" | "left" | "right" | null;
-                      tone: "default" | "inverse" | "muted" | null;
-                    }
-                  | {
-                      _key: string;
-                      _type: "heading";
-                      text: string | null;
-                      level: "1" | "2" | "3" | "4" | null;
-                      size: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | null;
-                      align: "center" | "left" | "right" | null;
-                    }
-                  | {
-                      _key: string;
-                      _type: "imageBlock";
-                      caption: string | null;
-                      aspect: "1/1" | "16/9" | "3/4" | "4/3" | "auto" | null;
-                      radius: "card" | "none" | "pill" | null;
-                      image: {
-                        asset?: SanityImageAssetReference;
-                        media?: unknown;
-                        hotspot?: SanityImageHotspot;
-                        crop?: SanityImageCrop;
-                        alt: string | null;
-                        _type: "image";
-                        dimensions: SanityImageDimensions | null;
-                        lqip: string | null;
-                        url: string | null;
-                      } | null;
-                    }
-                  | {
-                      _key: string;
-                      _type: "richText";
-                      body: Array<{
-                        children?: Array<{
-                          marks?: Array<string>;
-                          text?: string;
-                          _type: "span";
-                          _key: string;
-                        }>;
-                        style?: "normal";
-                        listItem?: "bullet" | "number";
-                        markDefs?: Array<{
-                          href?: string;
-                          _type: "link";
-                          _key: string;
-                        }>;
-                        level?: number;
-                        _type: "block";
-                        _key: string;
-                      }> | null;
-                      size:
-                        | "text-body-lg"
-                        | "text-body-md"
-                        | "text-body-sm"
-                        | "text-body-xl"
-                        | "text-body-xsm"
-                        | null;
-                      tone: "default" | "inverse" | "muted" | null;
-                      align: "center" | "left" | "right" | null;
-                    }
-                  | {
-                      _key: string;
-                      _type: "spacer";
-                      size: "lg" | "md" | "none" | "sm" | "xl" | "xs" | null;
-                    }
-                  | {
-                      _key: string;
-                      _type: "video";
-                      url: string | null;
-                      aspect: "1/1" | "16/9" | "3/4" | "4/3" | "auto" | null;
-                      mode: "autoplay" | "click" | "hover" | null;
-                      poster: {
-                        asset?: SanityImageAssetReference;
-                        media?: unknown;
-                        hotspot?: SanityImageHotspot;
-                        crop?: SanityImageCrop;
-                        alt: string | null;
-                        _type: "image";
-                        dimensions: SanityImageDimensions | null;
-                        lqip: string | null;
-                        url: string | null;
-                      } | null;
-                    }
-                > | null;
-              }> | null;
-            }
-          | {
-              _key: string;
-              _type: "divider";
-              tone: "default" | "inverse" | "muted" | null;
-            }
-          | {
-              _key: string;
-              _type: "eyebrow";
-              text: string | null;
-              align: "center" | "left" | "right" | null;
-              tone: "default" | "inverse" | "muted" | null;
-            }
-          | {
-              _key: string;
-              _type: "heading";
-              text: string | null;
-              level: "1" | "2" | "3" | "4" | null;
-              size: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | null;
-              align: "center" | "left" | "right" | null;
-            }
-          | {
-              _key: string;
-              _type: "imageBlock";
-              caption: string | null;
-              aspect: "1/1" | "16/9" | "3/4" | "4/3" | "auto" | null;
-              radius: "card" | "none" | "pill" | null;
-              image: {
-                asset?: SanityImageAssetReference;
-                media?: unknown;
-                hotspot?: SanityImageHotspot;
-                crop?: SanityImageCrop;
-                alt: string | null;
-                _type: "image";
-                dimensions: SanityImageDimensions | null;
-                lqip: string | null;
-                url: string | null;
-              } | null;
-            }
-          | {
-              _key: string;
-              _type: "richText";
-              body: Array<{
-                children?: Array<{
-                  marks?: Array<string>;
-                  text?: string;
-                  _type: "span";
-                  _key: string;
-                }>;
-                style?: "normal";
-                listItem?: "bullet" | "number";
-                markDefs?: Array<{
-                  href?: string;
-                  _type: "link";
-                  _key: string;
-                }>;
-                level?: number;
-                _type: "block";
-                _key: string;
-              }> | null;
-              size:
-                | "text-body-lg"
-                | "text-body-md"
-                | "text-body-sm"
-                | "text-body-xl"
-                | "text-body-xsm"
-                | null;
-              tone: "default" | "inverse" | "muted" | null;
-              align: "center" | "left" | "right" | null;
-            }
-          | {
-              _key: string;
-              _type: "spacer";
-              size: "lg" | "md" | "none" | "sm" | "xl" | "xs" | null;
-            }
-          | {
-              _key: string;
-              _type: "video";
-              url: string | null;
-              aspect: "1/1" | "16/9" | "3/4" | "4/3" | "auto" | null;
-              mode: "autoplay" | "click" | "hover" | null;
-              poster: {
-                asset?: SanityImageAssetReference;
-                media?: unknown;
-                hotspot?: SanityImageHotspot;
-                crop?: SanityImageCrop;
-                alt: string | null;
-                _type: "image";
-                dimensions: SanityImageDimensions | null;
-                lqip: string | null;
-                url: string | null;
-              } | null;
-            }
-        > | null;
-      }
-  > | null;
-} | null;
+export type AllSanitySchemaTypes = Faq | SanityImageAssetReference | LogoMarquee | CardGrid | Card | Divider | Spacer | Video | ImageBlock | ButtonGroup | Button | RichText | Eyebrow | Heading | ContentWrapper | Column | Columns | Section | PageReference | Link | Seo | SiteSettings | SanityImageCrop | SanityImageHotspot | Page | Slug | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageMetadata | SanityFileAsset | SanityAssetSourceData | SanityImageAsset | Geopoint;
 
 // Source: ../web/src/lib/sanity/queries.ts
 // Variable: siteSettingsQuery
-// Query: *[_id == "siteSettings"][0]{    _id,    siteTitle,    footerTagline,    footerCopyright,    logo{  ...,  alt,  "dimensions": asset->metadata.dimensions,  "lqip": asset->metadata.lqip,  "url": asset->url},    nav[]{      _key,      label,      link{  type,  openInNewTab,  anchor,  external,  internal->{ "slug": slug.current }}    }  }
-export type SiteSettingsQueryResult =
-  | {
-      _id: "siteSettings";
-      siteTitle: null;
-      footerTagline: null;
-      footerCopyright: null;
-      logo: null;
-      nav: null;
-    }
-  | {
-      _id: "siteSettings";
-      siteTitle: string | null;
-      footerTagline: string | null;
-      footerCopyright: string | null;
-      logo: {
-        asset?: SanityImageAssetReference;
-        media?: unknown;
-        hotspot?: SanityImageHotspot;
-        crop?: SanityImageCrop;
-        alt: string | null;
-        _type: "image";
-        dimensions: SanityImageDimensions | null;
-        lqip: string | null;
-        url: string | null;
+// Query: *[_id == "siteSettings"][0]{    _id,    siteTitle,    footerTagline,    footerCopyright,    logo{  ...,  alt,  "dimensions": asset->metadata.dimensions},    nav[]{      _key,      label,      link{  type,  openInNewTab,  anchor,  external,  internal->{ "slug": slug.current }}    }  }
+export type SiteSettingsQueryResult = {
+  _id: "siteSettings";
+  siteTitle: null;
+  footerTagline: null;
+  footerCopyright: null;
+  logo: null;
+  nav: null;
+} | {
+  _id: "siteSettings";
+  siteTitle: string | null;
+  footerTagline: string | null;
+  footerCopyright: string | null;
+  logo: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt: string | null;
+    _type: "image";
+    dimensions: SanityImageDimensions | null;
+  } | null;
+  nav: Array<{
+    _key: string;
+    label: string | null;
+    link: {
+      type: "external" | "internal" | null;
+      openInNewTab: boolean | null;
+      anchor: string | null;
+      external: string | null;
+      internal: {
+        slug: string | null;
       } | null;
-      nav: Array<{
-        _key: string;
-        label: string | null;
-        link: {
-          type: "external" | "internal" | null;
-          openInNewTab: boolean | null;
-          anchor: string | null;
-          external: string | null;
-          internal: {
-            slug: string | null;
-          } | null;
-        } | null;
-      }> | null;
-    }
-  | null;
+    } | null;
+  }> | null;
+} | null;
 
 // Source: ../web/src/lib/sanity/queries.ts
 // Variable: PAGES_QUERY
@@ -955,15 +541,12 @@ export type PAGE_SLUGS_QUERY_RESULT = Array<{
 }>;
 
 // Query TypeMap
-declare global {
+import "@sanity/client";
+declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "page" && slug.current == $slug][0]{\n    _id,\n    title,\n    "slug": slug.current,\n    seo{\n      title,\n      description,\n      ogImage{\n  ...,\n  alt,\n  "dimensions": asset->metadata.dimensions,\n  "lqip": asset->metadata.lqip,\n  "url": asset->url\n}\n    },\n    "legacyBody": body,\n    sections[]{\n      _key,\n      _type,\n      _type == "section" => {\n        variant,\n        background,\n        spacing,\n        align,\n        borderTop,\n        content[]{\n          \n  _key,\n  _type,\n  _type == "heading" => { text, level, size, align },\n  _type == "eyebrow" => { text, align, tone },\n  _type == "richText" => { body, size, tone, align },\n  _type == "buttonGroup" => { align, buttons[]{\n  _key,\n  _type,\n  label,\n  variant,\n  withArrow,\n  link{\n  type,\n  openInNewTab,\n  anchor,\n  external,\n  internal->{ "slug": slug.current }\n}\n} },\n  _type == "imageBlock" => { caption, aspect, radius, image{\n  ...,\n  alt,\n  "dimensions": asset->metadata.dimensions,\n  "lqip": asset->metadata.lqip,\n  "url": asset->url\n} },\n  _type == "video" => { url, aspect, mode, poster{\n  ...,\n  alt,\n  "dimensions": asset->metadata.dimensions,\n  "lqip": asset->metadata.lqip,\n  "url": asset->url\n} },\n  _type == "spacer" => { size },\n  _type == "divider" => { tone },\n  _type == "cardGrid" => {\n    columns,\n    cards[]{\n      _key,\n      _type,\n      style,\n      eyebrow,\n      title,\n      description,\n      header,\n      body,\n      icon,\n      border,\n      align,\n      image{\n  ...,\n  alt,\n  "dimensions": asset->metadata.dimensions,\n  "lqip": asset->metadata.lqip,\n  "url": asset->url\n},\n      button{\n  _key,\n  _type,\n  label,\n  variant,\n  withArrow,\n  link{\n  type,\n  openInNewTab,\n  anchor,\n  external,\n  internal->{ "slug": slug.current }\n}\n}\n    }\n  }\n,\n          _type == "columns" => {\n            layout,\n            gap,\n            verticalAlign,\n            columns[]{\n              _key,\n              _type,\n              content[]{ \n  _key,\n  _type,\n  _type == "heading" => { text, level, size, align },\n  _type == "eyebrow" => { text, align, tone },\n  _type == "richText" => { body, size, tone, align },\n  _type == "buttonGroup" => { align, buttons[]{\n  _key,\n  _type,\n  label,\n  variant,\n  withArrow,\n  link{\n  type,\n  openInNewTab,\n  anchor,\n  external,\n  internal->{ "slug": slug.current }\n}\n} },\n  _type == "imageBlock" => { caption, aspect, radius, image{\n  ...,\n  alt,\n  "dimensions": asset->metadata.dimensions,\n  "lqip": asset->metadata.lqip,\n  "url": asset->url\n} },\n  _type == "video" => { url, aspect, mode, poster{\n  ...,\n  alt,\n  "dimensions": asset->metadata.dimensions,\n  "lqip": asset->metadata.lqip,\n  "url": asset->url\n} },\n  _type == "spacer" => { size },\n  _type == "divider" => { tone },\n  _type == "cardGrid" => {\n    columns,\n    cards[]{\n      _key,\n      _type,\n      style,\n      eyebrow,\n      title,\n      description,\n      header,\n      body,\n      icon,\n      border,\n      align,\n      image{\n  ...,\n  alt,\n  "dimensions": asset->metadata.dimensions,\n  "lqip": asset->metadata.lqip,\n  "url": asset->url\n},\n      button{\n  _key,\n  _type,\n  label,\n  variant,\n  withArrow,\n  link{\n  type,\n  openInNewTab,\n  anchor,\n  external,\n  internal->{ "slug": slug.current }\n}\n}\n    }\n  }\n }\n            }\n          }\n        }\n      },\n      _type == "logoMarquee" => {\n        label,\n        background,\n        logos[]{\n  ...,\n  alt,\n  "dimensions": asset->metadata.dimensions,\n  "lqip": asset->metadata.lqip,\n  "url": asset->url\n}\n      },\n      _type == "faq" => {\n        heading,\n        intro,\n        closePrevious,\n        openByDefault,\n        background,\n        items[]{ _key, question, answer }\n      }\n    }\n  }\n': PageBySlugQueryResult;
-    '\n  *[_id == "siteSettings"][0]{\n    _id,\n    siteTitle,\n    footerTagline,\n    footerCopyright,\n    logo{\n  ...,\n  alt,\n  "dimensions": asset->metadata.dimensions,\n  "lqip": asset->metadata.lqip,\n  "url": asset->url\n},\n    nav[]{\n      _key,\n      label,\n      link{\n  type,\n  openInNewTab,\n  anchor,\n  external,\n  internal->{ "slug": slug.current }\n}\n    }\n  }\n': SiteSettingsQueryResult;
-    '*[_type == "page" && defined(slug.current)] | order(_createdAt desc){ _id, title, "slug": slug.current }': PAGES_QUERY_RESULT;
-    '*[_type == "page" && defined(slug.current) && slug.current != "home"]{ "params": { "slug": slug.current } }': PAGE_SLUGS_QUERY_RESULT;
+    "\n  *[_id == \"siteSettings\"][0]{\n    _id,\n    siteTitle,\n    footerTagline,\n    footerCopyright,\n    logo{\n  ...,\n  alt,\n  \"dimensions\": asset->metadata.dimensions\n},\n    nav[]{\n      _key,\n      label,\n      link{\n  type,\n  openInNewTab,\n  anchor,\n  external,\n  internal->{ \"slug\": slug.current }\n}\n    }\n  }\n": SiteSettingsQueryResult;
+    "*[_type == \"page\" && defined(slug.current)] | order(_createdAt desc){ _id, title, \"slug\": slug.current }": PAGES_QUERY_RESULT;
+    "*[_type == \"page\" && defined(slug.current) && slug.current != \"home\"]{ \"params\": { \"slug\": slug.current } }": PAGE_SLUGS_QUERY_RESULT;
   }
 }
-// Lets @sanity/client releases that predate the global registry read it too
-declare module "@sanity/client" {
-  interface SanityQueries extends globalThis.SanityQueries {}
-}
+

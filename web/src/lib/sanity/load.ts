@@ -88,6 +88,8 @@ export type PageDocument = {
     description?: string | null;
     ogImage?: SanityImage | null;
   } | null;
+  /** Raw JSON strings authored in Studio; parsed at render time. */
+  jsonLd?: string | null;
   sections?: PageBlock[] | null;
   /** Portable Text from pages created before sections existed. Rendered only when sections is empty. */
   legacyBody?: { _type: string; [key: string]: unknown }[] | null;

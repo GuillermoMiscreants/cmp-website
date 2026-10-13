@@ -17,10 +17,10 @@
   ],
   "dependencies": {
     "@sanity/icons": "^5.2.2",
-    "@sanity/vision": "^6.16.0",
+    "@sanity/vision": "^6.19.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "sanity": "^6.16.0",
+    "sanity": "^6.19.0",
     "styled-components": "^6.1.18"
   },
   "devDependencies": {
@@ -35,5 +35,9 @@
     "printWidth": 100,
     "semi": false,
     "singleQuote": true
+  },
+  "overrides": {
+    "smol-toml": "^1.9.1",
+    "js-yaml": "^4.3.2"
   }
 }

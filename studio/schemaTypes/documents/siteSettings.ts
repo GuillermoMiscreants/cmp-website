@@ -14,6 +14,20 @@ export const siteSettings = defineType({
       type: 'string',
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: 'canonicalUrl',
+      title: 'Canonical URL',
+      description: 'Base URL of the live site, e.g. https://example.com (no trailing slash).',
+      type: 'url',
+      validation: (rule) => rule.uri({scheme: ['https', 'http']}),
+    }),
+    defineField({
+      name: 'favicon',
+      title: 'Favicon',
+      description: 'Square .ico, .png or .svg, at least 32×32.',
+      type: 'file',
+      options: {accept: '.ico,.png,.svg,image/x-icon,image/png,image/svg+xml'},
+    }),
     imageWithAlt('logo', 'Logo'),
     defineField({
       name: 'nav',

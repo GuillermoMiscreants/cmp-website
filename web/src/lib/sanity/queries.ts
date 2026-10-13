@@ -91,6 +91,7 @@ export const pageBySlugQuery = defineQuery(`
       description,
       ogImage${imageProjection}
     },
+    jsonLd,
     "legacyBody": body,
     sections[]{
       _key,

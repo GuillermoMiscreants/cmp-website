@@ -52,6 +52,27 @@ export const page = defineType({
       type: 'seo',
     }),
     defineField({
+      name: 'jsonLd',
+      title: 'JSON-LD structured data',
+      description:
+        'Optional schema.org JSON-LD for this page. Paste the JSON only, without the <script> tag.',
+      type: 'text',
+      rows: 14,
+      validation: (rule) =>
+        rule.custom((value) => {
+          if (!value?.trim()) return true
+          try {
+            const parsed = JSON.parse(value)
+            if (parsed === null || typeof parsed !== 'object') {
+              return 'JSON-LD must be an object or an array of objects.'
+            }
+            return true
+          } catch (error) {
+            return `Invalid JSON: ${(error as Error).message}`
+          }
+        }),
+    }),
+    defineField({
       name: 'sections',
       title: 'Sections',
       type: 'array',

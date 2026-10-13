@@ -14,6 +14,195 @@ import PreviewEditing from "./PreviewEditing.tsx";
   }
 
   /*
+    Block picker modal. Rendered as a dark island (data-theme="dark") so it
+    reads the dark semantic tokens whatever theme the page uses.
+  */
+  .bp-root {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    pointer-events: auto;
+    font-family: var(--font-sans);
+    color: var(--color-fg);
+  }
+
+  .bp-backdrop {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 12vh 1rem 1rem;
+    background: color-mix(in srgb, var(--color-canvas) 55%, transparent);
+    backdrop-filter: blur(2px);
+  }
+
+  .bp-modal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 38rem;
+    max-height: min(34rem, 76vh);
+    overflow: hidden;
+    border: 1px solid var(--color-stroke-strong);
+    border-radius: var(--radius-card);
+    background: var(--color-panel);
+    box-shadow: var(--shadow-popover);
+  }
+
+  .bp-search {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    color: var(--color-fg-muted);
+  }
+
+  .bp-search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--color-fg);
+    font: inherit;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .bp-search input::placeholder {
+    color: var(--color-fg-subtle);
+  }
+
+  .bp-modal kbd {
+    display: inline-block;
+    min-width: 1.25rem;
+    padding: 0.0625rem 0.375rem;
+    border: 1px solid var(--color-stroke-strong);
+    border-radius: 0.25rem;
+    color: var(--color-fg-muted);
+    font: inherit;
+    font-size: 0.6875rem;
+    line-height: 1.25rem;
+    text-align: center;
+  }
+
+  .bp-tabs {
+    display: flex;
+    gap: 1.25rem;
+    padding: 0 1.25rem;
+    border-bottom: 1px solid var(--color-stroke);
+  }
+
+  .bp-tab {
+    margin-bottom: -1px;
+    padding: 0.5rem 0 0.625rem;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--color-fg-subtle);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .bp-tab:hover,
+  .bp-tab[aria-selected="true"] {
+    color: var(--color-fg);
+  }
+
+  .bp-tab[aria-selected="true"] {
+    border-bottom-color: var(--color-fg);
+  }
+
+  .bp-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0.5rem;
+  }
+
+  .bp-empty {
+    margin: 0;
+    padding: 2rem 1rem;
+    color: var(--color-fg-muted);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  .bp-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--color-fg);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .bp-item[aria-selected="true"] {
+    background: var(--color-panel-muted);
+  }
+
+  .bp-icon {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--color-stroke);
+    border-radius: 0.5rem;
+    color: var(--color-success);
+  }
+
+  .bp-text {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  .bp-label {
+    font-size: 0.9375rem;
+    line-height: 1.25rem;
+  }
+
+  .bp-hint {
+    overflow: hidden;
+    color: var(--color-fg-subtle);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .bp-group {
+    flex: none;
+    color: var(--color-fg-subtle);
+    font-size: 0.75rem;
+  }
+
+  .bp-footer {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem 1.25rem;
+    border-top: 1px solid var(--color-stroke);
+    color: var(--color-fg-subtle);
+    font-size: 0.75rem;
+  }
+
+  .bp-error {
+    color: var(--color-fg);
+  }
+
+  /*
     Remove sits in the hover label, beside the type name. No chip of its own —
     the label is already the green tag, and this icon uses the label's white.
   */
