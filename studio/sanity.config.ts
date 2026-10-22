@@ -6,9 +6,15 @@ import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
 import {deleteSelectedBlock} from './deleteSelectedBlock'
 
+const studioEnv = (import.meta as {env?: Record<string, string | boolean | undefined>}).env
+const workerOrigin = 'https://cmp-website-preview.guillermo-casanova.workers.dev'
+
+// `sanity dev` loads the local Astro server so preview code changes show up
+// without deploying the Worker. A deployed Studio loads the Worker. Set
+// SANITY_STUDIO_PREVIEW_ORIGIN to override either.
 const previewOrigin =
-  (import.meta as {env?: Record<string, string | undefined>}).env?.SANITY_STUDIO_PREVIEW_ORIGIN ||
-  'https://cmp-website-preview.guillermo-casanova.workers.dev'
+  (studioEnv?.SANITY_STUDIO_PREVIEW_ORIGIN as string | undefined) ||
+  (studioEnv?.DEV ? 'http://localhost:4321' : workerOrigin)
 
 export default defineConfig({
   name: 'default',

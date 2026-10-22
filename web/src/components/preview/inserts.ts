@@ -4,7 +4,10 @@ function key() {
   return crypto.randomUUID();
 }
 
-function heading(text = "Heading"): BlockStub {
+const LOREM_PARAGRAPH =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+
+function heading(text = "Lorem ipsum"): BlockStub {
   return { _type: "heading", _key: key(), text, level: "2", size: "h2" };
 }
 
@@ -54,7 +57,7 @@ const creators = {
     _key: key(),
     size: "text-body-md",
     tone: "default",
-    body: [textBlock("Text")],
+    body: [textBlock(LOREM_PARAGRAPH)],
   }),
   buttonGroup: (): BlockStub => ({
     _type: "buttonGroup",
@@ -89,8 +92,8 @@ const creators = {
     gap: "md",
     verticalAlign: "top",
     columns: [
-      { _type: "column", _key: key(), content: [heading("Heading")] },
-      { _type: "column", _key: key(), content: [heading("Heading")] },
+      { _type: "column", _key: key(), content: [heading()] },
+      { _type: "column", _key: key(), content: [heading()] },
     ],
   }),
   contentWrapper: (): BlockStub => ({
@@ -99,7 +102,7 @@ const creators = {
     align: "left",
     paddingTop: "none",
     paddingBottom: "none",
-    content: [heading("Heading")],
+    content: [heading()],
   }),
   section: (): BlockStub => ({
     _type: "section",

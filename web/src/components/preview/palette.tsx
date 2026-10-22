@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
 import { stegaClean } from "@sanity/client/stega";
-import { at, insert as insertAt, remove } from "@sanity/mutate";
+import { at, insert as insertAt, remove, set } from "@sanity/mutate";
 import { decodeSanityNodeData } from "@sanity/visual-editing-csm";
 import { useDocuments, useIsPresentationTool } from "@sanity/visual-editing/react";
 import { defineOverlayPlugin } from "@sanity/visual-editing/unstable_overlay-components";
@@ -14,9 +14,12 @@ import {
   type PaletteItem,
   type PaletteType,
 } from "./inserts";
+import { BlockTab } from "./blockTab";
 import { LayersPanel } from "./layers";
 import { BlockPicker } from "./picker";
+import { refreshBlockLabels, setLabelSource } from "./blockLabels";
 import { installReorder } from "./reorder";
+import { installTextEdit } from "./textEdit";
 
 /** PreviewEditing dispatches this after swapping the page landmark. */
 export const previewContentReplaced = "preview-content-replaced";
@@ -334,7 +337,6 @@ function InsertHandle() {
   const [insidePlace, setInsidePlace] = useState<PlusPlace | null>(null);
   const [picker, setPicker] = useState<{ anchor: Anchor; intoSection: boolean } | null>(null);
   const [pickerError, setPickerError] = useState<string | null>(null);
-  const lastAnchor = useRef<Anchor | null>(null);
   const engaged = useRef(0);
   const onEngage = useRef((active: boolean) => {
     engaged.current = Math.max(0, engaged.current + (active ? 1 : -1));
@@ -387,10 +389,6 @@ function InsertHandle() {
     };
   }, [anchor]);
 
-  useEffect(() => {
-    if (anchor) lastAnchor.current = anchor;
-  }, [anchor]);
-
   const openPicker = (target: Anchor, intoSection: boolean) => {
     setPickerError(null);
     setPicker({ anchor: target, intoSection });
@@ -401,47 +399,6 @@ function InsertHandle() {
     onEngage(true);
     return () => onEngage(false);
   }, [picker, onEngage]);
-
-  const anchorRef = useRef<Anchor | null>(null);
-  anchorRef.current = anchor;
-  const pickerOpen = useRef(false);
-  pickerOpen.current = picker !== null;
-
-  useEffect(() => {
-    const toggle = () => {
-      if (!insertApi.presentation) return;
-      if (pickerOpen.current) {
-        setPicker(null);
-        return;
-      }
-      const fallback = lastAnchor.current?.element.isConnected ? lastAnchor.current : null;
-      const target = anchorRef.current ?? fallback;
-      if (!target) return;
-      const interior = sectionInterior(target);
-      setPickerError(null);
-      setPicker(interior ? { anchor: interior, intoSection: true } : { anchor: target, intoSection: false });
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey) || event.altKey || event.key.toLowerCase() !== "k") return;
-      if (!insertApi.presentation) return;
-      event.preventDefault();
-      event.stopPropagation();
-      if (!event.repeat) toggle();
-    };
-    /** Studio owns Cmd/Ctrl+K while it has focus and forwards it here. */
-    const onMessage = (event: MessageEvent) => {
-      if (window.parent === window || event.source !== window.parent) return;
-      const data = event.data;
-      if (!data || data.source !== "cmp-preview" || data.type !== "toggle-picker") return;
-      toggle();
-    };
-    window.addEventListener("keydown", onKey, true);
-    window.addEventListener("message", onMessage);
-    return () => {
-      window.removeEventListener("keydown", onKey, true);
-      window.removeEventListener("message", onMessage);
-    };
-  }, [version]);
 
   if (!insertApi.presentation) return null;
 
@@ -497,7 +454,17 @@ function InsertHandle() {
 
 let insertRoot: ReturnType<typeof createRoot> | null = null;
 
+/** Saves text typed on the page into its Sanity field. Rejects so the editor can restore the old text. */
+function saveText(id: string, path: string, value: string) {
+  const getDocument = insertApi.getDocument;
+  if (!getDocument) return Promise.reject(new Error("Document is not ready."));
+  const doc = getDocument(stegaClean(id));
+  return Promise.resolve(doc.patch(() => [at(stegaClean(path), set(value))])).then(() => undefined);
+}
+
 function ensureInsertUI() {
+  installTextEdit(saveText);
+  window.addEventListener(previewContentReplaced, () => void refreshBlockLabels());
   installReorder(
     (id, build) => {
       const getDocument = insertApi.getDocument;
@@ -544,6 +511,14 @@ function ensureInsertUI() {
   insertRoot = createRoot(host);
   insertRoot.render(<InsertHandle />);
 
+  const tabHost = document.createElement("div");
+  tabHost.style.position = "fixed";
+  tabHost.style.inset = "0";
+  tabHost.style.zIndex = "2147483646";
+  tabHost.style.pointerEvents = "none";
+  document.documentElement.appendChild(tabHost);
+  createRoot(tabHost).render(<BlockTab chrome={insertApi} contentReplacedEvent={previewContentReplaced} />);
+
   const layerHost = document.createElement("div");
   layerHost.style.position = "fixed";
   layerHost.style.inset = "0";
@@ -568,6 +543,7 @@ export const blockPalette = defineOverlayPlugin(() => {
       useLayoutEffect(() => {
         if (inPresentation === null) return;
         insertApi.publish(getDocument, inPresentation);
+        setLabelSource(getDocument);
       }, [getDocument, inPresentation]);
       return null;
     },

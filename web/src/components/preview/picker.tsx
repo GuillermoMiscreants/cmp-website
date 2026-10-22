@@ -178,6 +178,15 @@ export function BlockPicker({ items, title, error, onChoose, onClose }: PickerPr
     input.current?.focus();
   }, []);
 
+  // Escape closes even when focus has left the modal (e.g. after clicking its background).
+  useEffect(() => {
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onEscape);
+    return () => document.removeEventListener("keydown", onEscape);
+  }, [onClose]);
+
   useEffect(() => {
     setActive(0);
   }, [query, tab]);
@@ -236,6 +245,11 @@ export function BlockPicker({ items, title, error, onChoose, onClose }: PickerPr
             onChange={(event) => setQuery(event.target.value)}
           />
           <kbd>esc</kbd>
+          <button type="button" className="bp-close" aria-label="Close" onClick={onClose}>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+              <path d="m5 5 10 10M15 5 5 15" />
+            </svg>
+          </button>
         </div>
 
         <div role="tablist" className="bp-tabs">

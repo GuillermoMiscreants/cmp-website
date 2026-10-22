@@ -120,7 +120,9 @@ export default defineConfig({
   // here. Drives canonical URLs, og:url/og:image, JSON-LD @id values and the
   // sitemap.
   site: site.url,
-  output: visualEditing ? 'server' : 'static',
+  // `astro dev` renders per request too, so pages can read the preview cookie.
+  // A prerendered page never sees request headers.
+  output: visualEditing || isDev ? 'server' : 'static',
   adapter:
     visualEditing || isDev
       ? cloudflare({
@@ -196,8 +198,9 @@ export default defineConfig({
   ],
   vite: {
     define: {
+      // `astro dev` counts as an editor build, like the preview deployment.
       'import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED': JSON.stringify(
-        visualEditing ? 'true' : 'false',
+        visualEditing || isDev ? 'true' : 'false',
       ),
     },
     plugins: [tailwindcss()],

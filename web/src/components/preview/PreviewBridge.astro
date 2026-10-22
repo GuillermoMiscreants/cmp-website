@@ -13,6 +13,75 @@ import PreviewEditing from "./PreviewEditing.tsx";
     background-color: #53924d;
   }
 
+  /* Full-page loader shown while a moved section waits for the refreshed page. */
+  [data-move-loader] {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483645;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.875rem;
+    background: color-mix(in srgb, var(--color-canvas) 70%, transparent);
+    backdrop-filter: blur(2px);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 150ms ease, visibility 0s linear 150ms;
+  }
+
+  [data-move-loader][data-visible] {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  .move-loader-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid var(--color-stroke-strong);
+    border-top-color: #53924d;
+    border-radius: 50%;
+    animation: move-loader-spin 0.8s linear infinite;
+  }
+
+  @keyframes move-loader-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .move-loader-spinner {
+      animation-duration: 2.4s;
+    }
+  }
+
+  /*
+    Typing on the page. The text under edit gets the same green ring, and the
+    overlay and hover controls step aside so clicks and the caret reach it.
+  */
+  [data-text-editing-target] {
+    outline: 2px solid #53924d;
+    outline-offset: 3px;
+    cursor: text;
+  }
+
+  html[data-text-editing] sanity-visual-editing {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  html[data-text-editing] [data-insert-anchor],
+  html[data-text-editing] [data-block-tab] {
+    display: none;
+  }
+
   /*
     Block picker modal. Rendered as a dark island (data-theme="dark") so it
     reads the dark semantic tokens whatever theme the page uses.
@@ -85,6 +154,25 @@ import PreviewEditing from "./PreviewEditing.tsx";
     font-size: 0.6875rem;
     line-height: 1.25rem;
     text-align: center;
+  }
+
+  .bp-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--color-fg-muted);
+    cursor: pointer;
+  }
+
+  .bp-close:hover {
+    color: var(--color-fg);
+    background: var(--color-stroke);
   }
 
   .bp-tabs {
@@ -203,30 +291,50 @@ import PreviewEditing from "./PreviewEditing.tsx";
   }
 
   /*
-    Remove sits in the hover label, beside the type name. No chip of its own —
-    the label is already the green tag, and this icon uses the label's white.
+    One tab per block: drag handle, name, remove. It is ours, so the pointer
+    can travel onto it. Presentation's own tab is hidden; the page-level
+    "Home" tab was the second one that showed in the gaps between blocks.
   */
-  sanity-visual-editing [data-remove-block] {
-    display: inline-flex;
-    flex: none;
+  sanity-visual-editing [data-hovered] [data-ui="Flex"]:has(> [data-ui="Flex"] > [data-ui="Text"]):not(:has(a)) {
+    display: none !important;
+  }
+
+  .block-tab {
+    position: fixed;
+    display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+    background: #53924d;
+    color: #fff;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: auto;
+  }
+
+  .block-tab [data-block-tab-drag] {
+    display: inline-flex;
+    margin-left: -0.25rem;
+    line-height: 0;
+    cursor: grab;
+  }
+
+  .block-tab button {
+    display: inline-flex;
     margin: 0;
     padding: 0;
     border: 0;
     background: transparent;
-    color: #fff;
+    color: inherit;
     line-height: 0;
     cursor: pointer;
-    pointer-events: auto;
   }
 
-  sanity-visual-editing [data-remove-block]:hover {
+  .block-tab button:hover {
     opacity: 0.72;
-  }
-
-  sanity-visual-editing [data-remove-block] svg {
-    display: block;
   }
 
   sanity-visual-editing,

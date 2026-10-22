@@ -33,7 +33,7 @@ export type LayerNode = {
   children: LayerNode[];
 };
 
-type LayerDocument = {
+export type LayerDocument = {
   getSnapshot: () => Promise<{ sections?: unknown } | null>;
 };
 
@@ -146,7 +146,7 @@ export function layerTree(snapshot: { sections?: unknown }) {
   return walkItems(asItems(snapshot.sections), "sections");
 }
 
-function pageDocumentId() {
+export function pageDocumentId() {
   const node = document.querySelector("#main [data-sanity]");
   const raw = node?.getAttribute("data-sanity");
   if (!raw) return null;
