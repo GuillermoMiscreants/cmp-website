@@ -18,7 +18,7 @@ const previewOrigin =
 
 export default defineConfig({
   name: 'default',
-  title: 'Cyber Marketing Practice',
+  title: 'Sanity + Astro Visual Builder Starter v1.2',
 
   projectId: '66h6oo6f',
   dataset: 'production',

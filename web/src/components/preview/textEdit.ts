@@ -10,6 +10,10 @@ type Field = {
   /** The text node as rendered, with the invisible source-map characters. */
   encoded: string;
   text: string;
+  /** The element's markup before editing, so a cancel puts back the line breaks too. */
+  html: string;
+  /** Line breaks in the source text render as <br>, so the field holds more than one line. */
+  multiline: boolean;
 };
 
 type Change = { id: string; path: string; before: string; after: string };
@@ -23,23 +27,38 @@ const undoStack: Change[] = [];
 const redoStack: Change[] = [];
 
 /**
- * A leaf element whose only child is one stega-encoded text node. Stega is how
+ * A leaf element whose children are stega-encoded text, with <br> for line breaks. Stega is how
  * Sanity says which field produced the text, so the same marker tells us where
  * a typed value goes. Anything with child elements or mixed text is left alone.
  */
 function fieldOf(element: Element): Field | null {
-  if (!(element instanceof HTMLElement) || element.childElementCount > 0) return null;
-  if (element.childNodes.length !== 1) return null;
-  const node = element.childNodes[0];
-  if (node.nodeType !== Node.TEXT_NODE || !node.textContent) return null;
-  const encoded = node.textContent;
+  if (!(element instanceof HTMLElement) || element.childNodes.length === 0) return null;
+  let encoded = "";
+  let multiline = false;
+  for (const node of Array.from(element.childNodes)) {
+    if (node.nodeType === Node.TEXT_NODE) encoded += node.textContent ?? "";
+    else if (node instanceof HTMLBRElement) {
+      encoded += "\n";
+      multiline = true;
+    } else return null;
+  }
+  if (!encoded) return null;
   const text = stegaClean(encoded);
   if (text === encoded) return null;
   const decoded = vercelStegaDecode<SanityStegaNode>(encoded);
   const target = decoded ? decodeSanityNodeData(decoded) : undefined;
   if (!target || !("id" in target) || !("path" in target)) return null;
   if (typeof target.id !== "string" || typeof target.path !== "string") return null;
-  return { element, id: stegaClean(target.id), path: stegaClean(target.path), encoded, text };
+  return {
+    element,
+    id: stegaClean(target.id),
+    path: stegaClean(target.path),
+    encoded,
+    text,
+    html: element.innerHTML,
+    // Rich text paragraphs can always take line breaks, even before they have one.
+    multiline: multiline || /\.children\[[^\]]*\]\.text$/.test(stegaClean(target.path)),
+  };
 }
 
 /** The page element under the pointer, looking through the Presentation overlay that sits on top of it. */
@@ -76,12 +95,16 @@ function placeCaret(element: HTMLElement, x: number, y: number) {
 function onKeyDown(event: KeyboardEvent) {
   // Keep page scripts (menus, sliders, the delete shortcut) out of the typing.
   event.stopPropagation();
+  const multiline = Boolean(session?.multiline);
   if (event.key === "Enter") {
     event.preventDefault();
-    finish(true);
+    // In a multi-line field Enter starts a new line. Cmd/Ctrl+Enter finishes, like Escape.
+    if (multiline && !(event.metaKey || event.ctrlKey)) document.execCommand("insertText", false, "\n");
+    else finish(true);
   } else if (event.key === "Escape") {
     event.preventDefault();
-    finish(false);
+    // Typing several lines is work worth keeping, so Escape saves there. A single line still cancels.
+    finish(multiline);
   } else if (event.key === " " && session?.element.closest("button")) {
     // A space inside a button presses it instead of typing.
     event.preventDefault();
@@ -106,6 +129,7 @@ function begin(field: Field, x: number, y: number) {
   element.closest("a")?.setAttribute("draggable", "false");
   // Type into clean text. The encoded copy comes back on cancel or after the page refreshes.
   element.textContent = field.text;
+  if (field.multiline) element.style.whiteSpace = "pre-wrap";
   element.setAttribute("contenteditable", "plaintext-only");
   if (element.contentEditable !== "plaintext-only") element.setAttribute("contenteditable", "true");
   element.addEventListener("keydown", onKeyDown);
@@ -113,6 +137,35 @@ function begin(field: Field, x: number, y: number) {
   element.addEventListener("blur", onBlur);
   element.focus({ preventScroll: true });
   placeCaret(element, x, y);
+}
+
+/** The typed text with line breaks kept. Chrome may store a break as <br> or a <div> instead of "\n". */
+function readText(element: HTMLElement) {
+  let out = "";
+  const walk = (node: Node, top: boolean) => {
+    for (const child of Array.from(node.childNodes)) {
+      if (child.nodeType === Node.TEXT_NODE) out += child.textContent ?? "";
+      else if (child instanceof HTMLBRElement) out += "\n";
+      else if (child instanceof HTMLElement) {
+        if (!top || out === "" || out.endsWith("\n")) walk(child, false);
+        else {
+          out += "\n";
+          walk(child, false);
+        }
+      }
+    }
+  };
+  walk(element, true);
+  return out;
+}
+
+/** Puts text back as rendered markup, with <br> for each line break. */
+function showText(element: HTMLElement, text: string) {
+  element.replaceChildren();
+  text.split("\n").forEach((line, index) => {
+    if (index > 0) element.append(document.createElement("br"));
+    if (line) element.append(document.createTextNode(line));
+  });
 }
 
 function finish(commit: boolean) {
@@ -123,7 +176,9 @@ function finish(commit: boolean) {
   element.removeEventListener("keydown", onKeyDown);
   element.removeEventListener("keyup", onKeyUp);
   element.removeEventListener("blur", onBlur);
-  const next = (element.textContent ?? "").replace(/[\r\n]+/g, " ");
+  const typed = current.multiline ? readText(element) : (element.textContent ?? "");
+  const next = current.multiline ? typed.replace(/\r/g, "") : typed.replace(/[\r\n]+/g, " ");
+  if (current.multiline) element.style.removeProperty("white-space");
   element.removeAttribute("contenteditable");
   element.removeAttribute("data-text-editing-target");
   element.closest("a")?.removeAttribute("draggable");
@@ -132,14 +187,14 @@ function finish(commit: boolean) {
   window.getSelection()?.removeAllRanges();
 
   if (!commit || next === current.text || !write) {
-    element.textContent = current.encoded;
+    element.innerHTML = current.html;
     return;
   }
-  element.textContent = next;
+  showText(element, next);
   const change: Change = { id: current.id, path: current.path, before: current.text, after: next };
   void commitChange(change).catch((cause: unknown) => {
     console.error("Could not save the text.", cause);
-    element.textContent = current.encoded;
+    element.innerHTML = current.html;
   });
 }
 
