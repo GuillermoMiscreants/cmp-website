@@ -158,3 +158,44 @@ export function pasteBlock(getDocument: GetActionDocument, documentId: string, p
     }
   });
 }
+
+export type DropZone = "before" | "after" | "inside";
+export type MovePlan = { arrayPath: string; ref: string | null; position: "before" | "after" };
+
+/** Where a dragged layer would land on a target row, or null when the nesting rules or the tree forbid it. */
+export function planMove(
+  dragged: { path: string; type: string },
+  target: { path: string; type: string; childKeys: string[] },
+  parentType: string | null,
+  zone: DropZone,
+): MovePlan | null {
+  if (target.path === dragged.path || target.path.startsWith(`${dragged.path}.`)) return null;
+  if (zone === "inside") {
+    const field = childField[target.type];
+    if (!field || !accepts[target.type]?.includes(dragged.type)) return null;
+    const draggedKey = splitPath(dragged.path)?.key;
+    const last = target.childKeys.filter((key) => key !== draggedKey).at(-1) ?? null;
+    return { arrayPath: `${target.path}.${field}`, ref: last, position: "after" };
+  }
+  const sibling = splitPath(target.path);
+  if (!sibling || !accepts[parentType ?? "root"]?.includes(dragged.type)) return null;
+  return { arrayPath: sibling.arrayPath, ref: sibling.key, position: zone };
+}
+
+/** Moves a block in one patch, so it stays a single undo step and keeps its keys. */
+export async function moveBlock(getDocument: GetActionDocument, documentId: string, path: string, plan: MovePlan) {
+  const parts = splitPath(path);
+  if (!parts) return;
+  showLoader("Moving block…");
+  try {
+    const value = await readBlock(getDocument(documentId), path);
+    const placed = plan.ref ? insert(value, plan.position, { _key: plan.ref }) : insert(value, "after", -1);
+    await getDocument(documentId).patch(() => [
+      at(parts.arrayPath, remove({ _key: parts.key })),
+      at(plan.arrayPath, setIfMissing([])),
+      at(plan.arrayPath, placed),
+    ]);
+  } catch (cause) {
+    fail("Could not move block.", cause);
+  }
+}

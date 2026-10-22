@@ -301,9 +301,9 @@ export const rowGapClass: Record<ColumnsGap, string> = {
 };
 
 export const verticalAlignClass: Record<VerticalAlign, string> = {
-  top: "items-start",
-  center: "items-center",
-  bottom: "items-end",
+  top: "lg:items-start",
+  center: "lg:items-center",
+  bottom: "lg:items-end",
 };
 
 export const headingTag: Record<HeadingLevel, "h1" | "h2" | "h3" | "h4"> = {

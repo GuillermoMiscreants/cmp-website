@@ -6,6 +6,9 @@ import {
   cutBlock,
   deleteBlock,
   duplicateBlock,
+  moveBlock,
+  planMove,
+  type DropZone,
   pasteBlock,
   planPaste,
   type ActionDocument,
@@ -54,6 +57,44 @@ export type LayerChrome = {
   subscribe: (listener: () => void) => () => void;
   snapshot: () => number;
 };
+
+type Level = "error" | "warning";
+
+/**
+ * Validation lives in the Studio. The preview names its page, and the Studio answers with the worst
+ * level for every block path that has a problem in itself or in anything inside it.
+ */
+const validation = {
+  levels: {} as Record<string, Level>,
+  requested: "",
+  listeners: new Set<() => void>(),
+  subscribe(listener: () => void) {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  },
+  snapshot() {
+    return this.levels;
+  },
+  request(id: string) {
+    if (window.parent === window || this.requested === id) return;
+    this.requested = id;
+    window.parent.postMessage({ source: "cmp-preview", type: "request-validation", id }, "*");
+  },
+  receive(event: MessageEvent) {
+    if (window.parent === window || event.source !== window.parent) return;
+    const data = event.data;
+    if (!data || data.source !== "cmp-preview" || data.type !== "validation") return;
+    if (!data.levels || typeof data.levels !== "object") return;
+    this.levels = data.levels as Record<string, Level>;
+    this.listeners.forEach((listener) => listener());
+  },
+};
+
+if (typeof window !== "undefined") {
+  window.addEventListener("message", (event) => validation.receive(event));
+}
 
 function textOf(value: unknown) {
   return typeof value === "string" ? stegaClean(value).replace(/\s+/g, " ").trim() : "";
@@ -233,11 +274,23 @@ function keyOf(path: string) {
 const rowButton =
   "min-h-7 min-w-0 flex-1 truncate rounded-sm px-1.5 text-left text-body-xsm text-fg hover:bg-panel-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
 
+type Dnd = {
+  dragging: string | null;
+  drop: { path: string; zone: DropZone } | null;
+  start: (node: LayerNode) => void;
+  over: (event: React.DragEvent<HTMLElement>, node: LayerNode, parentType: string | null) => void;
+  leave: (path: string) => void;
+  end: () => void;
+  commit: (event: React.DragEvent<HTMLElement>, node: LayerNode, parentType: string | null) => void;
+};
+
 function LayerBranch({
   node,
   depth,
   expanded,
   selected,
+  levels,
+  dnd,
   parentType,
   onToggle,
   onSelect,
@@ -247,6 +300,8 @@ function LayerBranch({
   depth: number;
   expanded: Set<string>;
   selected: string | null;
+  levels: Record<string, Level>;
+  dnd: Dnd;
   parentType: string | null;
   onToggle: (path: string) => void;
   onSelect: (path: string) => void;
@@ -255,9 +310,45 @@ function LayerBranch({
   const isContainer = containers.has(node.type);
   const isOpen = isContainer && expanded.has(node.path);
   const groupId = `layer-${encodeURIComponent(node.path)}`;
+  const level = levels[node.path];
+  const isSelected = selected === node.path;
+  const rowClass = isSelected
+    ? `${rowButton} bg-panel-muted font-semibold shadow-[inset_2px_0_0_#53924d]`
+    : rowButton;
+  const tint =
+    level === "error"
+      ? " !bg-[rgba(220,38,38,0.22)] hover:!bg-[rgba(220,38,38,0.32)]"
+      : level === "warning"
+        ? " !bg-[rgba(217,119,6,0.2)] hover:!bg-[rgba(217,119,6,0.3)]"
+        : "";
   return (
     <div role="treeitem" aria-expanded={isContainer ? isOpen : undefined} aria-selected={selected === node.path} aria-level={depth + 1}>
-      <div className="flex items-center gap-0.5" style={{ paddingLeft: depth * 12 }}>
+      <div
+        className="flex items-center gap-0.5"
+        style={{
+          paddingLeft: depth * 12,
+          opacity: dnd.dragging === node.path ? 0.4 : 1,
+          boxShadow:
+            dnd.drop?.path !== node.path
+              ? undefined
+              : dnd.drop.zone === "before"
+                ? "inset 0 2px 0 #53924d"
+                : dnd.drop.zone === "after"
+                  ? "inset 0 -2px 0 #53924d"
+                  : "inset 0 0 0 2px #53924d",
+        }}
+        draggable
+        onDragStart={(event) => {
+          event.stopPropagation();
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", node.label);
+          dnd.start(node);
+        }}
+        onDragOver={(event) => dnd.over(event, node, parentType)}
+        onDragLeave={() => dnd.leave(node.path)}
+        onDragEnd={dnd.end}
+        onDrop={(event) => dnd.commit(event, node, parentType)}
+      >
         {isContainer ? (
           <button
             type="button"
@@ -275,11 +366,8 @@ function LayerBranch({
         <button
           type="button"
           data-layer-path={node.path}
-          className={
-            selected === node.path
-              ? `${rowButton} bg-panel-muted font-semibold shadow-[inset_2px_0_0_#53924d]`
-              : rowButton
-          }
+          className={rowClass + tint}
+          title={level === "error" ? "Has errors" : level === "warning" ? "Has warnings" : undefined}
           onClick={() => onSelect(node.path)}
           onContextMenu={(event) => onMenu(event, node, parentType)}
         >
@@ -295,6 +383,8 @@ function LayerBranch({
               depth={depth + 1}
               expanded={expanded}
               selected={selected}
+              levels={levels}
+              dnd={dnd}
               parentType={node.type}
               onToggle={onToggle}
               onSelect={onSelect}
@@ -407,6 +497,11 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
     () => chrome.snapshot(),
     () => 0,
   );
+  const levels = useSyncExternalStore(
+    (listener) => validation.subscribe(listener),
+    () => validation.snapshot(),
+    () => validation.snapshot(),
+  );
   const [open, setOpen] = useState(false);
   const [reordering, setReordering] = useState(false);
   const [ready, setReady] = useState(false);
@@ -417,6 +512,9 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [menu, setMenu] = useState<MenuState | null>(null);
+  const dragRef = useRef<LayerNode | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const [drop, setDrop] = useState<{ path: string; zone: DropZone } | null>(null);
 
   useEffect(() => {
     const sync = () => setReordering(document.documentElement.hasAttribute("data-reordering"));
@@ -432,6 +530,7 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
       const current = ++generation;
       const getDocument = chrome.getDocument;
       const id = pageDocumentId();
+      if (id) validation.request(id);
       if (!getDocument || !id) {
         if (current !== generation) return;
         setNodes([]);
@@ -535,6 +634,56 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
   const getDocument = chrome.getDocument;
   const documentId = pageDocumentId();
 
+  const zoneFor = (event: React.DragEvent<HTMLElement>, node: LayerNode, parentType: string | null) => {
+    const dragged = dragRef.current;
+    if (!dragged) return null;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const ratio = rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
+    const target = { path: node.path, type: node.type, childKeys: node.children.map((child) => keyOf(child.path)) };
+    const order: DropZone[] = ratio < 0.25 ? ["before", "inside"] : ratio > 0.75 ? ["after", "inside"] : ["inside", ratio < 0.5 ? "before" : "after"];
+    for (const zone of order) {
+      const plan = planMove({ path: dragged.path, type: dragged.type }, target, parentType, zone);
+      if (plan) return { zone, plan };
+    }
+    return null;
+  };
+  const dnd: Dnd = {
+    dragging,
+    drop,
+    start: (node) => {
+      dragRef.current = node;
+      setDragging(node.path);
+      setMenu(null);
+    },
+    over: (event, node, parentType) => {
+      if (!dragRef.current) return;
+      const found = zoneFor(event, node, parentType);
+      if (!found) {
+        setDrop(null);
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = "move";
+      setDrop((current) => (current?.path === node.path && current.zone === found.zone ? current : { path: node.path, zone: found.zone }));
+    },
+    leave: (path) => setDrop((current) => (current?.path === path ? null : current)),
+    end: () => {
+      dragRef.current = null;
+      setDragging(null);
+      setDrop(null);
+    },
+    commit: (event, node, parentType) => {
+      const dragged = dragRef.current;
+      const found = zoneFor(event, node, parentType);
+      dnd.end();
+      if (!dragged || !found || !getDocument || !documentId) return;
+      event.preventDefault();
+      event.stopPropagation();
+      void moveBlock(getDocument, documentId, dragged.path, found.plan);
+    },
+  };
+
   const openMenu = (event: React.MouseEvent, node: LayerNode, parentType: string | null) => {
     event.preventDefault();
     event.stopPropagation();
@@ -591,6 +740,8 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
                   depth={0}
                   expanded={expanded}
                   selected={selected}
+                  levels={levels}
+                  dnd={dnd}
                   parentType={null}
                   onToggle={toggle}
                   onSelect={select}

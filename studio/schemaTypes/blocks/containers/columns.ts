@@ -15,15 +15,15 @@ export const columns = defineType({
       type: 'array',
       of: [defineArrayMember({type: 'column'})],
       validation: (rule) =>
-        rule.required().min(2).max(4).custom((value, context) => {
+        rule.required().min(1).max(4).custom((value, context) => {
           const layout = (context.parent as {layout?: string} | undefined)?.layout || '1-1'
           const expected = layout.split('-').length
           const count = Array.isArray(value) ? value.length : 0
           if (count !== expected) {
-            return `This layout needs ${expected} columns. You have ${count}.`
+            return {message: `This layout expects ${expected} columns. You have ${count}.`, level: 'warning'}
           }
           return true
-        }),
+        }).warning(),
     }),
     listField('layout', 'Layout', columnsLayout, '1-1', 'Column split. The count must match the number of columns.'),
     listField('gap', 'Column gap', columnsGap, 'md', 'Space between columns, side to side.'),
