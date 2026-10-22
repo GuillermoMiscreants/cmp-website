@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { validatePreviewUrl, urlSearchParamPreviewPathname } from "@sanity/preview-url-secret";
-import { getClient } from "../lib/sanity/client";
-import { expiredPartitionedPreviewCookie, previewCookieHeader, toPublicPath } from "../lib/sanity/preview";
+import { getClient, getReadToken } from "../lib/sanity/client";
+import { expiredPartitionedPreviewCookie, previewCookieHeader, signPreviewCookie, toPublicPath } from "../lib/sanity/preview";
 
 export const prerender = false;
 
@@ -14,9 +14,13 @@ export const GET: APIRoute = async ({ request }) => {
     }
     const url = new URL(request.url);
     const pathname = result.redirectTo || url.searchParams.get(urlSearchParamPreviewPathname) || "/";
+    const maxAge = 60 * 60 * 24 * 7;
     const headers = new Headers();
     headers.append("Set-Cookie", expiredPartitionedPreviewCookie());
-    headers.append("Set-Cookie", previewCookieHeader(request.url, 60 * 60 * 24 * 7));
+    headers.append(
+      "Set-Cookie",
+      previewCookieHeader(request.url, maxAge, await signPreviewCookie(getReadToken()!, maxAge)),
+    );
     headers.set("Location", toPublicPath(pathname));
     return new Response(null, { status: 307, headers });
   } catch (error) {

@@ -131,6 +131,8 @@ Local HTTP uses a plain `SameSite=Lax` cookie because browsers drop Partitioned 
 
 `web/src/middleware.ts` allows framing by Studio origins and sets `noindex` on the preview deployment. It does nothing on the production build.
 
+The preview Worker is not behind Cloudflare Access (Access cannot be satisfied inside Studio's cross-site iframe). Instead the middleware returns 403 unless the request carries a signed `sanity-preview` cookie (`<expiry>.<HMAC>`, keyed on `SANITY_API_READ_TOKEN`). Only `/api/preview/enable` (after Sanity validates the preview secret) and `/api/preview/edit` issue one. `/api/preview/edit` still needs a Cloudflare Access application scoped to that single path, because it trusts the `cf-access-jwt-assertion` header. Rotating the read token signs everyone out.
+
 ### Editing tools in the preview
 
 React tools load only in dev and in the preview build (`PreviewBridge.astro` → `PreviewEditing.tsx`, code in `web/src/components/preview/`). The React renderer is left out of the production build entirely.

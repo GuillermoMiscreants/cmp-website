@@ -105,6 +105,11 @@ function sanityPreviewRoutes() {
           prerender: false,
         });
         injectRoute({
+          pattern: '/api/preview/edit',
+          entrypoint: './src/preview/edit.ts',
+          prerender: false,
+        });
+        injectRoute({
           pattern: '/api/preview/disable',
           entrypoint: './src/preview/disable.ts',
           prerender: false,
@@ -198,6 +203,9 @@ export default defineConfig({
   ],
   vite: {
     define: {
+      // The shell value (build:preview points at the hosted Studio) must beat
+      // the localhost URL in .env, or "Open in Studio" links go to localhost.
+      'import.meta.env.PUBLIC_SANITY_STUDIO_URL': JSON.stringify(PUBLIC_SANITY_STUDIO_URL),
       // `astro dev` counts as an editor build, like the preview deployment.
       'import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED': JSON.stringify(
         visualEditing || isDev ? 'true' : 'false',

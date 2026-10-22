@@ -9,7 +9,7 @@ export const prerender = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED !=
 
 const preview =
   (import.meta.env.DEV || import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === "true") &&
-  isPreview(Astro.cookies);
+  isPreview(Astro.locals);
 const { page, settings } = await loadPage("home", preview);
 ---
 

@@ -2,6 +2,15 @@
 
 import type { EmailMessage } from "cloudflare:email";
 
+declare global {
+  namespace App {
+    interface Locals {
+      /** True when the request carries a valid signed preview cookie. */
+      preview?: boolean;
+    }
+  }
+}
+
 interface SendEmailBinding {
   send(message: EmailMessage): Promise<void>;
 }

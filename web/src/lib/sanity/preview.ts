@@ -9,10 +9,10 @@ export const PREVIEW_COOKIE = "sanity-preview";
  * enableVisualEditing. HTTPS previews are cross-site, so they keep the
  * partitioned cookie.
  */
-export function previewCookieHeader(requestUrl: string, maxAge: number) {
+export function previewCookieHeader(requestUrl: string, maxAge: number, value = "") {
   const secure = new URL(requestUrl).protocol === "https:";
   const parts = [
-    `${PREVIEW_COOKIE}=${maxAge > 0 ? "1" : ""}`,
+    `${PREVIEW_COOKIE}=${maxAge > 0 ? value : ""}`,
     "Path=/",
     "HttpOnly",
     `Max-Age=${maxAge}`,
@@ -35,8 +35,44 @@ export function expiredPartitionedPreviewCookie() {
   ].join("; ");
 }
 
-export function isPreview(cookies: { get(name: string): { value: string } | undefined }) {
-  return cookies.get(PREVIEW_COOKIE)?.value === "1";
+/**
+ * The preview cookie is `<expiry>.<hmac>`, signed with the Worker's read token.
+ * The preview host is not behind Cloudflare Access, so a bare flag cookie would
+ * let anyone who sets it by hand see drafts. Only /api/preview/enable (after
+ * Sanity validates the preview secret) and /api/preview/edit (behind Access)
+ * issue a valid one.
+ */
+async function sign(expiry: string, secret: string) {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${PREVIEW_COOKIE}:${expiry}`));
+  return [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export async function signPreviewCookie(secret: string, maxAge: number) {
+  const expiry = String(Math.floor(Date.now() / 1000) + maxAge);
+  return `${expiry}.${await sign(expiry, secret)}`;
+}
+
+export async function verifyPreviewCookie(secret: string | undefined, value: string | undefined) {
+  if (!secret || !value) return false;
+  const [expiry, mac] = value.split(".");
+  if (!expiry || !mac || Number(expiry) < Date.now() / 1000) return false;
+  const expected = await sign(expiry, secret);
+  if (expected.length !== mac.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ mac.charCodeAt(i);
+  return diff === 0;
+}
+
+/** Set by the middleware once the cookie signature checks out. */
+export function isPreview(locals: { preview?: boolean }) {
+  return locals.preview === true;
 }
 
 /** Keep preview navigations on the same paths the public site uses. */
