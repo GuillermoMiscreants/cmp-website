@@ -165,6 +165,14 @@ function onUndoKey(event: KeyboardEvent) {
 }
 
 function onClick(event: MouseEvent) {
+  // Placing the caret, double-click to select a word, shift-click to extend: each is a click on the
+  // text being edited. Left alone, Presentation sees it and opens the field in the Studio panel.
+  // The browser still gets the click, so the caret and selection work.
+  if (session && event.target instanceof Node && session.element.contains(event.target)) {
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    return;
+  }
   if (event.button !== 0 || event.defaultPrevented) return;
   if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
   if (window.parent === window || session || recentlyDragged()) return;

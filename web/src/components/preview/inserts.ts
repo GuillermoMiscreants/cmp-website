@@ -33,12 +33,27 @@ function button(label: string): BlockStub {
   };
 }
 
+const LOREM_SHORT = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.";
+
+function richText(text = LOREM_PARAGRAPH): BlockStub {
+  return {
+    _type: "richText",
+    _key: key(),
+    size: "text-body-md",
+    tone: "default",
+    body: [textBlock(text)],
+  };
+}
+
 function card(title: string): BlockStub {
   return {
     _type: "card",
     _key: key(),
     style: "featured",
+    eyebrow: "Eyebrow",
     title,
+    description: LOREM_SHORT,
+    button: button("Learn more"),
     border: "none",
     align: "left",
   };
@@ -52,13 +67,7 @@ const creators = {
     tone: "muted",
   }),
   heading: () => heading(),
-  richText: (): BlockStub => ({
-    _type: "richText",
-    _key: key(),
-    size: "text-body-md",
-    tone: "default",
-    body: [textBlock(LOREM_PARAGRAPH)],
-  }),
+  richText: () => richText(),
   buttonGroup: (): BlockStub => ({
     _type: "buttonGroup",
     _key: key(),
@@ -83,7 +92,7 @@ const creators = {
     _type: "cardGrid",
     _key: key(),
     columns: "2",
-    cards: [card("Card"), card("Card")],
+    cards: [card("Lorem ipsum"), card("Lorem ipsum")],
   }),
   columns: (): BlockStub => ({
     _type: "columns",
@@ -92,8 +101,8 @@ const creators = {
     gap: "md",
     verticalAlign: "top",
     columns: [
-      { _type: "column", _key: key(), content: [heading()] },
-      { _type: "column", _key: key(), content: [heading()] },
+      { _type: "column", _key: key(), content: [heading(), richText(LOREM_SHORT)] },
+      { _type: "column", _key: key(), content: [heading(), richText(LOREM_SHORT)] },
     ],
   }),
   contentWrapper: (): BlockStub => ({
@@ -102,7 +111,7 @@ const creators = {
     align: "left",
     paddingTop: "none",
     paddingBottom: "none",
-    content: [heading()],
+    content: [heading(), richText(LOREM_SHORT)],
   }),
   section: (): BlockStub => ({
     _type: "section",
@@ -113,7 +122,7 @@ const creators = {
     paddingBottom: "md",
     align: "left",
     borderTop: false,
-    content: [],
+    content: [heading(), richText()],
   }),
 } as const;
 

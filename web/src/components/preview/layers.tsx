@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { stegaClean } from "@sanity/client/stega";
 import { decodeSanityNodeData } from "@sanity/visual-editing-csm";
+import {
+  copyBlock,
+  cutBlock,
+  deleteBlock,
+  pasteBlock,
+  planPaste,
+  type ActionDocument,
+  type PastePlan,
+} from "./layerActions";
+import { currentSelection, onSelectionChange } from "./reorder";
 
 const typeLabel: Record<string, string> = {
   section: "Section",
@@ -33,7 +43,7 @@ export type LayerNode = {
   children: LayerNode[];
 };
 
-export type LayerDocument = {
+export type LayerDocument = ActionDocument & {
   getSnapshot: () => Promise<{ sections?: unknown } | null>;
 };
 
@@ -205,6 +215,20 @@ function openOverlay(element: HTMLElement, stillCurrent: () => boolean) {
   }, 160);
 }
 
+/** Every container path above this one: each prefix that ends at a keyed item. */
+function ancestorPaths(path: string) {
+  const found: string[] = [];
+  for (const match of path.matchAll(/\[_key=="[^"]+"\]/g)) {
+    const end = (match.index ?? 0) + match[0].length;
+    if (end < path.length) found.push(path.slice(0, end));
+  }
+  return found;
+}
+
+function keyOf(path: string) {
+  return /\[_key=="([^"]+)"\]$/.exec(path)?.[1] ?? "";
+}
+
 function containerPaths(nodes: LayerNode[], into: string[]) {
   for (const node of nodes) {
     if (containers.has(node.type)) into.push(node.path);
@@ -220,15 +244,19 @@ function LayerBranch({
   depth,
   expanded,
   selected,
+  parentType,
   onToggle,
   onSelect,
+  onMenu,
 }: {
   node: LayerNode;
   depth: number;
   expanded: Set<string>;
   selected: string | null;
+  parentType: string | null;
   onToggle: (path: string) => void;
   onSelect: (path: string) => void;
+  onMenu: (event: React.MouseEvent, node: LayerNode, parentType: string | null) => void;
 }) {
   const isContainer = containers.has(node.type);
   const isOpen = isContainer && expanded.has(node.path);
@@ -252,8 +280,14 @@ function LayerBranch({
         )}
         <button
           type="button"
-          className={selected === node.path ? `${rowButton} bg-panel-muted` : rowButton}
+          data-layer-path={node.path}
+          className={
+            selected === node.path
+              ? `${rowButton} bg-panel-muted font-semibold shadow-[inset_2px_0_0_#53924d]`
+              : rowButton
+          }
           onClick={() => onSelect(node.path)}
+          onContextMenu={(event) => onMenu(event, node, parentType)}
         >
           {node.label}
         </button>
@@ -267,12 +301,103 @@ function LayerBranch({
               depth={depth + 1}
               expanded={expanded}
               selected={selected}
+              parentType={node.type}
               onToggle={onToggle}
               onSelect={onSelect}
+              onMenu={onMenu}
             />
           ))}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+type MenuState = { x: number; y: number; node: LayerNode; plan: PastePlan | null };
+
+const menuItem =
+  "flex h-7 w-full items-center rounded-sm px-2 text-left text-body-xsm text-fg hover:bg-panel-muted focus-visible:bg-panel-muted focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40";
+
+function LayerMenu({
+  menu,
+  onClose,
+  onCut,
+  onCopy,
+  onPaste,
+  onDelete,
+}: {
+  menu: MenuState;
+  onClose: () => void;
+  onCut: () => void;
+  onCopy: () => void;
+  onPaste: () => void;
+  onDelete: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [place, setPlace] = useState({ left: menu.x, top: menu.y });
+
+  useEffect(() => {
+    const box = ref.current;
+    if (!box) return;
+    box.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus();
+    setPlace({
+      left: Math.max(4, Math.min(menu.x, window.innerWidth - box.offsetWidth - 4)),
+      top: Math.max(4, Math.min(menu.y, window.innerHeight - box.offsetHeight - 4)),
+    });
+  }, [menu.x, menu.y]);
+
+  useEffect(() => {
+    const onPointer = (event: Event) => {
+      if (!ref.current?.contains(event.target as Node)) onClose();
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.stopImmediatePropagation();
+        onClose();
+        return;
+      }
+      if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+      event.preventDefault();
+      const items = [...(ref.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? [])];
+      const at = items.indexOf(document.activeElement as HTMLButtonElement);
+      const step = event.key === "ArrowDown" ? 1 : -1;
+      items[(at + step + items.length) % items.length]?.focus();
+    };
+    window.addEventListener("pointerdown", onPointer, true);
+    window.addEventListener("contextmenu", onPointer, true);
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("resize", onClose);
+    window.addEventListener("blur", onClose);
+    return () => {
+      window.removeEventListener("pointerdown", onPointer, true);
+      window.removeEventListener("contextmenu", onPointer, true);
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("resize", onClose);
+      window.removeEventListener("blur", onClose);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      ref={ref}
+      role="menu"
+      aria-label={`${menu.node.label} actions`}
+      className="fixed z-20 w-44 rounded-sm border border-stroke bg-panel p-1"
+      style={{ left: place.left, top: place.top, boxShadow: "var(--shadow-popover)" }}
+    >
+      <button type="button" role="menuitem" className={menuItem} onClick={onCut}>
+        Cut
+      </button>
+      <button type="button" role="menuitem" className={menuItem} onClick={onCopy}>
+        Copy
+      </button>
+      <button type="button" role="menuitem" className={menuItem} disabled={!menu.plan} onClick={onPaste}>
+        Paste
+      </button>
+      <div role="separator" className="my-1 h-px bg-stroke" />
+      <button type="button" role="menuitem" className={menuItem} onClick={onDelete}>
+        Delete
+      </button>
     </div>
   );
 }
@@ -292,6 +417,8 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
   const seen = useRef(new Set<string>());
   const selectGeneration = useRef(0);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [menu, setMenu] = useState<MenuState | null>(null);
 
   useEffect(() => {
     const sync = () => setReordering(document.documentElement.hasAttribute("data-reordering"));
@@ -347,6 +474,29 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
     });
   }, [nodes]);
 
+  // Clicking a block on the page marks its row active and opens the rows above it.
+  useEffect(() => {
+    const follow = (item: { path: string } | null) => {
+      const path = item ? stegaClean(item.path) : null;
+      setSelected(path);
+      if (!path) return;
+      setExpanded((current) => {
+        const next = new Set(current);
+        for (const ancestor of ancestorPaths(path)) next.add(ancestor);
+        return next;
+      });
+    };
+    follow(currentSelection());
+    return onSelectionChange(follow);
+  }, []);
+
+  useEffect(() => {
+    if (!open || !selected) return;
+    for (const row of panelRef.current?.querySelectorAll("[data-layer-path]") ?? []) {
+      if (row.getAttribute("data-layer-path") === selected) row.scrollIntoView({ block: "nearest" });
+    }
+  }, [open, selected, expanded, nodes]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
@@ -380,6 +530,28 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
     }, 100);
   };
 
+  const getDocument = chrome.getDocument;
+  const documentId = pageDocumentId();
+
+  const openMenu = (event: React.MouseEvent, node: LayerNode, parentType: string | null) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setSelected(node.path);
+    setMenu({
+      x: event.clientX,
+      y: event.clientY,
+      node,
+      plan: planPaste({ path: node.path, type: node.type, childKeys: node.children.map((child) => keyOf(child.path)) }, parentType),
+    });
+  };
+  const closeMenu = () => setMenu(null);
+  const run = (action: (getDocument: NonNullable<typeof chrome.getDocument>, id: string, node: LayerNode) => void) => {
+    const current = menu;
+    setMenu(null);
+    if (!current || !getDocument || !documentId) return;
+    action(getDocument, documentId, current.node);
+  };
+
   return (
     <div data-insert-anchor="" className="fixed top-3 left-3 z-10 w-64" style={{ pointerEvents: "auto" }}>
       <button
@@ -395,6 +567,7 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
       {open ? (
         <div
           id="layer-panel"
+          ref={panelRef}
           role="tree"
           aria-label="Layers"
           className="mt-1 max-h-[70vh] overflow-auto rounded-sm border border-stroke bg-panel p-1"
@@ -409,12 +582,29 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
                 depth={0}
                 expanded={expanded}
                 selected={selected}
+                parentType={null}
                 onToggle={toggle}
                 onSelect={select}
+                onMenu={openMenu}
               />
             ))
           )}
         </div>
+      ) : null}
+      {menu ? (
+        <LayerMenu
+          menu={menu}
+          onClose={closeMenu}
+          onCut={() => run((get, id, node) => void cutBlock(get, id, node.path))}
+          onCopy={() => run((get, id, node) => void copyBlock(get, id, node.path))}
+          onPaste={() => {
+            const plan = menu.plan;
+            run((get, id) => {
+              if (plan) pasteBlock(get, id, plan);
+            });
+          }}
+          onDelete={() => run((get, id, node) => deleteBlock(get, id, node.path))}
+        />
       ) : null}
     </div>
   );

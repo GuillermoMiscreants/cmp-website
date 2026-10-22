@@ -20,6 +20,7 @@ import { BlockPicker } from "./picker";
 import { refreshBlockLabels, setLabelSource } from "./blockLabels";
 import { installReorder } from "./reorder";
 import { installTextEdit } from "./textEdit";
+import { hideLoader, showLoader } from "./loader";
 
 /** PreviewEditing dispatches this after swapping the page landmark. */
 export const previewContentReplaced = "preview-content-replaced";
@@ -257,12 +258,15 @@ function insertBlock(anchor: Anchor, intoSection: boolean, type: PaletteType): s
   try {
     const doc = getDocument(documentId);
     const block = createBlock(type);
+    showLoader("Adding block…");
     const placed = afterKey ? insertAt(block, "after", { _key: afterKey }) : insertAt(block, "after", -1);
     void Promise.resolve(doc.patch(() => [at(arrayPath, placed)])).catch((cause: unknown) => {
+      hideLoader();
       console.error("Could not insert block.", cause);
     });
     return null;
   } catch (cause) {
+    hideLoader();
     console.error("Could not insert block.", cause);
     return failure;
   }
@@ -522,7 +526,7 @@ function ensureInsertUI() {
   const layerHost = document.createElement("div");
   layerHost.style.position = "fixed";
   layerHost.style.inset = "0";
-  layerHost.style.zIndex = "2147483645";
+  layerHost.style.zIndex = "2147483647";
   layerHost.style.pointerEvents = "none";
   document.documentElement.appendChild(layerHost);
   createRoot(layerHost).render(

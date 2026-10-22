@@ -7,11 +7,17 @@ let overlay: HTMLElement | null = null;
 let failsafe: number | undefined;
 
 /**
- * Covers the page while a structural change (move, delete) waits for the
+ * Covers the page while a structural change (move, delete, add) waits for the
  * refreshed content. These round-trip through Sanity, so without this the
  * page looks unchanged for a couple of seconds. Hidden when the page content
  * is replaced.
  */
+/** Hides the loader early, e.g. when the change it waited on failed. */
+export function hideLoader() {
+  window.clearTimeout(failsafe);
+  overlay?.removeAttribute("data-visible");
+}
+
 export function showLoader(label: string) {
   if (!overlay) {
     overlay = document.createElement("div");

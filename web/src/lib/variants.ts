@@ -212,7 +212,21 @@ export const textAlignClass: Record<Align, string> = {
   right: "text-right",
 };
 
-/** Spacer and content-wrapper top padding. Same rhythm as `section-pt-*`. */
+/**
+ * Spacer height. A real height rather than padding on an empty div, so the
+ * element has content-box size and Presentation's overlay can hover and click it.
+ * Same rhythm as `section-pt-*`.
+ */
+export const spacerClass: Record<Spacing, string> = {
+  none: "h-2",
+  xs: "h-8 md:h-10",
+  sm: "h-12 md:h-16",
+  md: "h-16 md:h-24",
+  lg: "h-24 md:h-32",
+  xl: "h-32 md:h-48",
+};
+
+/** Content-wrapper top padding. Same rhythm as `section-pt-*`. */
 export const spacingClass: Record<Spacing, string> = {
   none: "",
   xs: "section-pt-xs",

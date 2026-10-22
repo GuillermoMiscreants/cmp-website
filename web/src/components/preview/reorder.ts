@@ -156,6 +156,25 @@ export function installReorder(
 let onRemove: ((item: { id: string; arrayPath: string; key: string }) => void) | null = null;
 let startDragFrom: ((item: Item, event: MouseEvent) => void) | null = null;
 let selected: Item | null = null;
+const selectionListeners = new Set<(item: Item | null) => void>();
+
+function setSelected(item: Item | null) {
+  selected = item;
+  for (const listener of selectionListeners) listener(item);
+}
+
+/** The block last clicked on the page, or null. */
+export function currentSelection() {
+  return selected;
+}
+
+/** Called whenever the selected block changes, so the layers panel can follow. */
+export function onSelectionChange(listener: (item: Item | null) => void) {
+  selectionListeners.add(listener);
+  return () => {
+    selectionListeners.delete(listener);
+  };
+}
 let focusedOverlay: Element | null = null;
 
 function isTextField(target: EventTarget | null) {
@@ -173,7 +192,7 @@ function isTextField(target: EventTarget | null) {
 function deleteSelected() {
   if (!selected || document.documentElement.hasAttribute("data-reordering")) return;
   const item = selected;
-  selected = null;
+  setSelected(null);
   onRemove?.({ id: item.id, arrayPath: item.arrayPath, key: item.key });
 }
 
@@ -185,10 +204,10 @@ function onSelect(event: MouseEvent) {
   const overlay = target.closest("sanity-visual-editing [data-focused], sanity-visual-editing [data-hovered]");
   if (overlay) {
     const item = itemForOverlay(overlay) ?? removableItem(target);
-    if (item) selected = item;
+    if (item) setSelected(item);
     return;
   }
-  selected = removableItem(target);
+  setSelected(removableItem(target));
 }
 
 /** Backspace belongs to text editing. Only Delete removes the selected block. */
@@ -235,7 +254,7 @@ function syncFocusedSelection() {
   if (!(focused instanceof Element) || focused === focusedOverlay) return;
   focusedOverlay = focused;
   const item = itemForOverlay(focused);
-  if (item) selected = item;
+  if (item) setSelected(item);
 }
 
 /** Drag a block from the tab handle. Needs two or more siblings. */
@@ -250,7 +269,7 @@ export function removeItem(item: Item) {
 
 /** Make this the block the Delete key removes. */
 export function selectItem(item: Item) {
-  selected = item;
+  setSelected(item);
 }
 
 let installed = false;
