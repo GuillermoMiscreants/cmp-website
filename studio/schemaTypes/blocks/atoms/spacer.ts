@@ -1,6 +1,6 @@
 import {ExpandIcon} from '@sanity/icons/Expand'
 import {defineType} from 'sanity'
-import {spacing} from '../../../../web/src/lib/variants'
+import {spacerSize} from '../../../../web/src/lib/variants'
 import {listField} from '../../fields/style'
 
 export const spacer = defineType({
@@ -8,7 +8,7 @@ export const spacer = defineType({
   title: 'Spacer',
   type: 'object',
   icon: ExpandIcon,
-  fields: [listField('size', 'Size', spacing, 'md', 'Empty space, using the section padding scale.')],
+  fields: [listField('size', 'Size', spacerSize, 'md', 'Empty vertical space.')],
   preview: {
     select: {size: 'size'},
     prepare({size}) {

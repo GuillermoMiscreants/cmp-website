@@ -18,6 +18,11 @@ export function hideLoader() {
   overlay?.removeAttribute("data-visible");
 }
 
+/** True while the loader is up, so a later change doesn't replace the label of the one already waiting. */
+export function isLoaderVisible() {
+  return overlay?.hasAttribute("data-visible") ?? false;
+}
+
 export function showLoader(label: string) {
   if (!overlay) {
     overlay = document.createElement("div");

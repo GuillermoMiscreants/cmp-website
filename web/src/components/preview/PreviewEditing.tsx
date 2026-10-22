@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { enableVisualEditing } from "@sanity/visual-editing";
+import { isLoaderVisible, showLoader } from "./loader";
 import { blockPalette, previewContentReplaced } from "./palette";
 
 let refreshGeneration = 0;
@@ -28,6 +29,9 @@ export default function PreviewEditing() {
       plugins: [blockPalette()],
       refresh: (payload) => {
         if (payload.source === "mutation") {
+          // Edits made in the Studio panel arrive here with nothing waiting on them.
+          // Moves, deletes and adds already put their own loader up.
+          if (!isLoaderVisible()) showLoader("Adjusting element…");
           void replaceMain().catch((cause: unknown) => {
             console.error("Could not refresh the preview.", cause);
             window.location.reload();

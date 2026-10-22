@@ -174,7 +174,7 @@ export type Heading = {
   _type: "heading";
   text?: string;
   level?: "1" | "2" | "3" | "4";
-  size?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  size?: "display" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   align?: "left" | "center" | "right";
 };
 

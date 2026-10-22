@@ -38,8 +38,8 @@ None — children are passed via the default `<slot />`.
 
 ## Mechanism
 
-- `flex flex-wrap gap-3 mt-4` on the wrapper. Children inherit the gap; rows wrap on overflow.
-- The `mt-4` is baked in — the component assumes the group sits below a heading or paragraph.
+- `flex flex-wrap gap-3` on the wrapper. Children inherit the gap; rows wrap on overflow.
+- No outer margin. Space the group from its siblings with the parent's gap or a spacer.
 
 ## Usage
 
@@ -57,5 +57,5 @@ import Button from "@components/Button.astro";
 
 ## Notes
 
-- The baked-in `mt-4` margin assumes the group sits below text. If you need it flush against a sibling (e.g. inside a card), wrap with `class="!mt-0"` or similar.
+- The group has no top margin. If it sits below text, add spacing from the parent (for example `gap-*` or `space-y-*`) or pass a `class` such as `mt-4`.
 - Anything goes inside — not just `Button`. Mix in `<a>`, `<Clickable>`, badges, etc. as long as flex-row layout makes sense.

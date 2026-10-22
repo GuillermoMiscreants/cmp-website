@@ -27,14 +27,14 @@ export const heading = defineType({
       'Size',
       headingSize,
       'h2',
-      'Visual size only. Use Level for SEO and accessibility.',
+      'Text size only, styled like that heading (Display largest). Use Level for SEO and accessibility.',
     ),
     alignField('Leave empty to follow the section or content wrapper.', null),
   ],
   preview: {
     select: {title: 'text', level: 'level', size: 'size'},
     prepare({title, level, size}) {
-      return {title: title || 'Heading', subtitle: `H${level || '2'} · ${size || 'h2'}`}
+      return {title: title || 'Heading', subtitle: `H${level || '2'} · ${(size || 'h2').toUpperCase()}`}
     },
   },
 })

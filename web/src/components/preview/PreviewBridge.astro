@@ -13,6 +13,21 @@ import PreviewEditing from "./PreviewEditing.tsx";
     background-color: #53924d;
   }
 
+  /*
+    Layers panel and its context menu. The semantic roles are redefined for
+    this subtree so the panel reads as part of the dark Sanity Studio chrome,
+    with soft green text.
+  */
+  .layers-theme {
+    --color-panel: #16181d;
+    --color-panel-muted: #23262e;
+    --color-fg: #b5dcae;
+    --color-fg-muted: #8fb988;
+    --color-stroke: #2b2f38;
+    --color-focus: #7bbf73;
+    color: var(--color-fg);
+  }
+
   /* Full-page loader shown while a moved section waits for the refreshed page. */
   [data-move-loader] {
     position: fixed;

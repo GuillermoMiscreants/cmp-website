@@ -229,13 +229,6 @@ function keyOf(path: string) {
   return /\[_key=="([^"]+)"\]$/.exec(path)?.[1] ?? "";
 }
 
-function containerPaths(nodes: LayerNode[], into: string[]) {
-  for (const node of nodes) {
-    if (containers.has(node.type)) into.push(node.path);
-    containerPaths(node.children, into);
-  }
-}
-
 const rowButton =
   "min-h-7 min-w-0 flex-1 truncate rounded-sm px-1.5 text-left text-body-xsm text-fg hover:bg-panel-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
 
@@ -382,7 +375,7 @@ function LayerMenu({
       ref={ref}
       role="menu"
       aria-label={`${menu.node.label} actions`}
-      className="fixed z-20 w-44 rounded-sm border border-stroke bg-panel p-1"
+      className="layers-theme fixed z-20 w-44 rounded-sm border border-stroke bg-panel p-1"
       style={{ left: place.left, top: place.top, boxShadow: "var(--shadow-popover)" }}
     >
       <button type="button" role="menuitem" className={menuItem} onClick={onCut}>
@@ -414,7 +407,6 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
   const [nodes, setNodes] = useState<LayerNode[]>([]);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [selected, setSelected] = useState<string | null>(null);
-  const seen = useRef(new Set<string>());
   const selectGeneration = useRef(0);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -461,20 +453,7 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
     };
   }, [chrome, contentReplacedEvent, version]);
 
-  useEffect(() => {
-    const fresh: string[] = [];
-    containerPaths(nodes, fresh);
-    const unseen = fresh.filter((path) => !seen.current.has(path));
-    if (unseen.length === 0) return;
-    for (const path of unseen) seen.current.add(path);
-    setExpanded((current) => {
-      const next = new Set(current);
-      for (const path of unseen) next.add(path);
-      return next;
-    });
-  }, [nodes]);
-
-  // Clicking a block on the page marks its row active and opens the rows above it.
+  // Clicking a block on the page marks its row active and opens the rows above it and the block itself.
   useEffect(() => {
     const follow = (item: { path: string } | null) => {
       const path = item ? stegaClean(item.path) : null;
@@ -483,12 +462,29 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
       setExpanded((current) => {
         const next = new Set(current);
         for (const ancestor of ancestorPaths(path)) next.add(ancestor);
+        next.add(path);
         return next;
       });
     };
     follow(currentSelection());
     return onSelectionChange(follow);
   }, []);
+
+  // The document handle is only published once Presentation renders the block plugin, which
+  // it does for a hovered block. Hover one for the editor so the layers load without a mouse move first.
+  useEffect(() => {
+    if (!open || chrome.getDocument) return;
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      const target = document.querySelector("#main [data-sanity]");
+      if (!(target instanceof HTMLElement) || ++tries > 20) {
+        window.clearInterval(timer);
+        return;
+      }
+      hoverOverlay(target);
+    }, 150);
+    return () => window.clearInterval(timer);
+  }, [open, chrome, version]);
 
   useEffect(() => {
     if (!open || !selected) return;
@@ -557,9 +553,10 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
       <button
         ref={toggleRef}
         type="button"
-        className="flex h-7 items-center rounded-full border border-stroke bg-panel px-2.5 text-body-xsm text-fg hover:bg-panel-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        className="layers-theme flex h-10 items-center rounded-sm border border-stroke bg-panel px-5 text-body-sm font-medium shadow-md hover:bg-panel-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         aria-expanded={open}
         aria-controls="layer-panel"
+        style={{ color: "#fff" }}
         onClick={() => setOpen((current) => !current)}
       >
         Layers
@@ -570,8 +567,9 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
           ref={panelRef}
           role="tree"
           aria-label="Layers"
-          className="mt-1 max-h-[70vh] overflow-auto rounded-sm border border-stroke bg-panel p-1"
+          className="layers-theme mt-1 max-h-[70vh] overflow-auto rounded-sm border border-stroke bg-panel p-1"
         >
+          {!ready ? <p className="px-2 py-1 text-body-xsm text-fg">Loading layers…</p> : null}
           {ready && nodes.length === 0 ? (
             <p className="px-2 py-1 text-body-xsm text-fg">This page has no sections.</p>
           ) : (

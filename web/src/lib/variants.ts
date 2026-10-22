@@ -42,12 +42,13 @@ export const headingLevel = [
 ] as const;
 
 export const headingSize = [
-  { title: "Display", value: "h1" },
-  { title: "XL", value: "h2" },
-  { title: "LG", value: "h3" },
-  { title: "MD", value: "h4" },
-  { title: "SM", value: "h5" },
-  { title: "XS", value: "h6" },
+  { title: "Display", value: "display" },
+  { title: "H1", value: "h1" },
+  { title: "H2", value: "h2" },
+  { title: "H3", value: "h3" },
+  { title: "H4", value: "h4" },
+  { title: "H5", value: "h5" },
+  { title: "H6", value: "h6" },
 ] as const;
 
 export const textSize = [
@@ -172,6 +173,7 @@ export type CardColumns = ValueOf<typeof cardColumns>;
 export type IconName = ValueOf<typeof iconName>;
 
 export const headingSizeClass: Record<HeadingSize, string> = {
+  display: "display",
   h1: "h1",
   h2: "h2",
   h3: "h3",
@@ -212,18 +214,36 @@ export const textAlignClass: Record<Align, string> = {
   right: "text-right",
 };
 
+/** Spacer sizes, smallest to largest. */
+export const spacerSize = [
+  { title: "X-tiny", value: "xtiny" },
+  { title: "Tiny", value: "tiny" },
+  { title: "XX-small", value: "xxs" },
+  { title: "X-small", value: "xs" },
+  { title: "Small", value: "sm" },
+  { title: "Medium", value: "md" },
+  { title: "Large", value: "lg" },
+  { title: "X-large", value: "xl" },
+] as const;
+
+export type SpacerSize = ValueOf<typeof spacerSize>;
+
 /**
  * Spacer height. A real height rather than padding on an empty div, so the
  * element has content-box size and Presentation's overlay can hover and click it.
- * Same rhythm as `section-pt-*`.
+ * X-small and up keep the `section-pt-*` rhythm; the three below it are finer steps.
  */
-export const spacerClass: Record<Spacing, string> = {
-  none: "h-2",
+export const spacerClass: Record<SpacerSize | "none", string> = {
+  xtiny: "h-2",
+  tiny: "h-4",
+  xxs: "h-6",
   xs: "h-8 md:h-10",
   sm: "h-12 md:h-16",
   md: "h-16 md:h-24",
   lg: "h-24 md:h-32",
   xl: "h-32 md:h-48",
+  // Saved before the finer sizes existed; same height as before.
+  none: "h-2",
 };
 
 /** Content-wrapper top padding. Same rhythm as `section-pt-*`. */

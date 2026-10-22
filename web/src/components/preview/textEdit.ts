@@ -173,6 +173,13 @@ function onClick(event: MouseEvent) {
     event.stopImmediatePropagation();
     return;
   }
+}
+
+/**
+ * A single click is left to Presentation, which opens the element's settings in the Studio panel.
+ * Double-click is what starts typing on the page.
+ */
+function onDoubleClick(event: MouseEvent) {
   if (event.button !== 0 || event.defaultPrevented) return;
   if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
   if (window.parent === window || session || recentlyDragged()) return;
@@ -181,18 +188,18 @@ function onClick(event: MouseEvent) {
   if (event.target instanceof Element && event.target.closest("[data-insert-anchor], [data-block-tab]")) return;
   const field = fieldAtPoint(event.clientX, event.clientY);
   if (!field) return;
-  // Presentation would open the field in Studio and pull focus out of the page.
   event.preventDefault();
   event.stopPropagation();
   event.stopImmediatePropagation();
   begin(field, event.clientX, event.clientY);
 }
 
-/** Click a heading, button label, or other text to type into it on the page. Saves on Enter or when focus leaves. */
+/** Double-click a heading, button label, or other text to type into it on the page. Saves on Enter or when focus leaves. */
 export function installTextEdit(save: Write) {
   write = save;
   if (installed) return;
   installed = true;
   window.addEventListener("click", onClick, true);
+  window.addEventListener("dblclick", onDoubleClick, true);
   window.addEventListener("keydown", onUndoKey);
 }

@@ -1,7 +1,7 @@
 import {DocumentIcon} from '@sanity/icons/Document'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 import {insertMenu} from '../fields/style'
-import {sectionPresets} from '../templates'
+import {faqMember, plainSectionMember, sectionPresets} from '../templates'
 
 type HeadingLike = {_type?: string; level?: string; content?: HeadingLike[]; columns?: HeadingLike[]}
 
@@ -77,10 +77,10 @@ export const page = defineType({
       title: 'Sections',
       type: 'array',
       of: [
-        defineArrayMember({type: 'section', name: 'section', title: 'Section'}),
+        plainSectionMember,
         ...sectionPresets,
         defineArrayMember({type: 'logoMarquee', name: 'logoMarquee', title: 'Logo marquee'}),
-        defineArrayMember({type: 'faq', name: 'faq', title: 'FAQ'}),
+        faqMember,
       ],
       options: insertMenu([
         {

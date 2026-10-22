@@ -181,6 +181,48 @@ const heroSplit = {
   ],
 }
 
+const plainSection = {
+  variant: 'default',
+  background: 'none',
+  paddingTop: 'md',
+  paddingBottom: 'md',
+  align: 'left',
+  borderTop: false,
+  content: [
+    {_type: 'heading', _key: 'heading', text: 'Section heading', level: '2', size: 'h2', align: 'left'},
+    {
+      _type: 'richText',
+      _key: 'text',
+      size: 'text-body-md',
+      tone: 'default',
+      align: 'left',
+      body: [textBlock('body', 'Add a short paragraph of supporting copy here.')],
+    },
+  ],
+}
+
+const faqPlaceholder = {
+  heading: 'Frequently asked questions',
+  intro: 'Answers to the questions we hear most.',
+  closePrevious: true,
+  background: 'none',
+  items: [1, 2, 3].map((n) => ({
+    _type: 'faqItem',
+    _key: `item-${n}`,
+    question: `Question ${n}?`,
+    answer: 'Write a short, helpful answer here.',
+  })),
+}
+
+export const plainSectionMember = defineArrayMember({
+  type: 'section',
+  name: 'section',
+  title: 'Section',
+  initialValue: plainSection,
+})
+
+export const faqMember = defineArrayMember({type: 'faq', name: 'faq', title: 'FAQ', initialValue: faqPlaceholder})
+
 export const sectionPresets = [
   defineArrayMember({type: 'section', name: 'heroCentered', title: 'Hero – centered', initialValue: heroCentered}),
   defineArrayMember({type: 'section', name: 'heroSplit', title: 'Hero – split', initialValue: heroSplit}),
