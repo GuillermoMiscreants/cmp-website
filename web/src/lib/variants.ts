@@ -286,10 +286,18 @@ export const imageRadiusClass: Record<ImageRadius, string> = {
   pill: "rounded-pill",
 };
 
+/** Space between columns on the x-axis. */
 export const gapClass: Record<ColumnsGap, string> = {
-  sm: "gap-4",
-  md: "gap-6",
-  lg: "gap-8",
+  sm: "gap-x-4",
+  md: "gap-x-6",
+  lg: "gap-x-8",
+};
+
+/** Space between rows on the y-axis, which is what separates stacked columns on small screens. */
+export const rowGapClass: Record<ColumnsGap, string> = {
+  sm: "gap-y-4",
+  md: "gap-y-6",
+  lg: "gap-y-8",
 };
 
 export const verticalAlignClass: Record<VerticalAlign, string> = {

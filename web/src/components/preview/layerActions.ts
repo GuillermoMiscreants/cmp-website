@@ -1,6 +1,6 @@
 import { at, insert, remove, setIfMissing, type NodePatchList } from "@sanity/mutate";
 import { getAtPath, parse } from "@sanity/mutate/path";
-import { hideLoader, showLoader } from "./loader";
+import { afterPaint, hideLoader, showLoader } from "./loader";
 
 type Snapshot = unknown;
 
@@ -114,12 +114,28 @@ export function deleteBlock(getDocument: GetActionDocument, documentId: string, 
   const parts = splitPath(path);
   if (!parts) return;
   showLoader("Deleting block…");
+  afterPaint(() => {
+    try {
+      void Promise.resolve(getDocument(documentId).patch(() => [at(parts.arrayPath, remove({ _key: parts.key }))])).catch(
+        (cause: unknown) => fail("Could not delete block.", cause),
+      );
+    } catch (cause) {
+      fail("Could not delete block.", cause);
+    }
+  });
+}
+
+/** Inserts a copy of the block right after itself, leaving the clipboard alone. */
+export async function duplicateBlock(getDocument: GetActionDocument, documentId: string, path: string) {
+  const parts = splitPath(path);
+  if (!parts) return;
+  showLoader("Duplicating block…");
   try {
-    void Promise.resolve(getDocument(documentId).patch(() => [at(parts.arrayPath, remove({ _key: parts.key }))])).catch(
-      (cause: unknown) => fail("Could not delete block.", cause),
-    );
+    const value = await readBlock(getDocument(documentId), path);
+    const copy = freshKeys(value);
+    await getDocument(documentId).patch(() => [at(parts.arrayPath, insert(copy, "after", { _key: parts.key }))]);
   } catch (cause) {
-    fail("Could not delete block.", cause);
+    fail("Could not duplicate block.", cause);
   }
 }
 
@@ -131,12 +147,14 @@ export function pasteBlock(getDocument: GetActionDocument, documentId: string, p
   if (!clipboard) return;
   const block = freshKeys(clipboard.value);
   showLoader("Pasting block…");
-  try {
-    const placed = plan.afterKey ? insert(block, "after", { _key: plan.afterKey }) : insert(block, "after", -1);
-    void Promise.resolve(
-      getDocument(documentId).patch(() => [at(plan.arrayPath, setIfMissing([])), at(plan.arrayPath, placed)]),
-    ).catch((cause: unknown) => fail("Could not paste block.", cause));
-  } catch (cause) {
-    fail("Could not paste block.", cause);
-  }
+  afterPaint(() => {
+    try {
+      const placed = plan.afterKey ? insert(block, "after", { _key: plan.afterKey }) : insert(block, "after", -1);
+      void Promise.resolve(
+        getDocument(documentId).patch(() => [at(plan.arrayPath, setIfMissing([])), at(plan.arrayPath, placed)]),
+      ).catch((cause: unknown) => fail("Could not paste block.", cause));
+    } catch (cause) {
+      fail("Could not paste block.", cause);
+    }
+  });
 }

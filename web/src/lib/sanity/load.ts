@@ -51,6 +51,7 @@ export type PageBlock = BlockBase & {
   cards?: CardField[] | null;
   layout?: string | null;
   gap?: string | null;
+  rowGap?: string | null;
   verticalAlign?: string | null;
   content?: PageBlock[] | null;
   style?: string | null;

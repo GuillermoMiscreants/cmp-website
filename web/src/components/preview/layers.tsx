@@ -5,6 +5,7 @@ import {
   copyBlock,
   cutBlock,
   deleteBlock,
+  duplicateBlock,
   pasteBlock,
   planPaste,
   type ActionDocument,
@@ -317,6 +318,7 @@ function LayerMenu({
   onCut,
   onCopy,
   onPaste,
+  onDuplicate,
   onDelete,
 }: {
   menu: MenuState;
@@ -324,6 +326,7 @@ function LayerMenu({
   onCut: () => void;
   onCopy: () => void;
   onPaste: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -386,6 +389,9 @@ function LayerMenu({
       </button>
       <button type="button" role="menuitem" className={menuItem} disabled={!menu.plan} onClick={onPaste}>
         Paste
+      </button>
+      <button type="button" role="menuitem" className={menuItem} onClick={onDuplicate}>
+        Duplicate
       </button>
       <div role="separator" className="my-1 h-px bg-stroke" />
       <button type="button" role="menuitem" className={menuItem} onClick={onDelete}>
@@ -562,31 +568,37 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
         Layers
       </button>
       {open ? (
-        <div
-          id="layer-panel"
-          ref={panelRef}
-          role="tree"
-          aria-label="Layers"
-          className="layers-theme mt-1 max-h-[70vh] overflow-auto rounded-sm border border-stroke bg-panel p-1"
-        >
-          {!ready ? <p className="px-2 py-1 text-body-xsm text-fg">Loading layers…</p> : null}
-          {ready && nodes.length === 0 ? (
-            <p className="px-2 py-1 text-body-xsm text-fg">This page has no sections.</p>
-          ) : (
-            nodes.map((node) => (
-              <LayerBranch
-                key={node.path}
-                node={node}
-                depth={0}
-                expanded={expanded}
-                selected={selected}
-                parentType={null}
-                onToggle={toggle}
-                onSelect={select}
-                onMenu={openMenu}
-              />
-            ))
-          )}
+        <div className="layers-theme mt-1 overflow-hidden rounded-sm border border-stroke bg-panel">
+          <div className="flex justify-end border-b border-stroke p-1">
+            <button
+              type="button"
+              className="rounded-sm px-2 py-1 text-body-xsm text-fg hover:bg-panel-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:opacity-50"
+              disabled={expanded.size === 0}
+              onClick={() => setExpanded(new Set())}
+            >
+              Collapse all
+            </button>
+          </div>
+          <div id="layer-panel" ref={panelRef} role="tree" aria-label="Layers" className="max-h-[70vh] overflow-auto p-1">
+            {!ready ? <p className="px-2 py-1 text-body-xsm text-fg">Loading layers…</p> : null}
+            {ready && nodes.length === 0 ? (
+              <p className="px-2 py-1 text-body-xsm text-fg">This page has no sections.</p>
+            ) : (
+              nodes.map((node) => (
+                <LayerBranch
+                  key={node.path}
+                  node={node}
+                  depth={0}
+                  expanded={expanded}
+                  selected={selected}
+                  parentType={null}
+                  onToggle={toggle}
+                  onSelect={select}
+                  onMenu={openMenu}
+                />
+              ))
+            )}
+          </div>
         </div>
       ) : null}
       {menu ? (
@@ -601,6 +613,7 @@ export function LayersPanel({ chrome, contentReplacedEvent }: { chrome: LayerChr
               if (plan) pasteBlock(get, id, plan);
             });
           }}
+          onDuplicate={() => run((get, id, node) => void duplicateBlock(get, id, node.path))}
           onDelete={() => run((get, id, node) => deleteBlock(get, id, node.path))}
         />
       ) : null}

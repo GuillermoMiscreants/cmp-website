@@ -53,7 +53,7 @@ import PreviewEditing from "./PreviewEditing.tsx";
     opacity: 1;
     pointer-events: auto;
     visibility: visible;
-    transition-delay: 0s;
+    transition: none;
   }
 
   .move-loader-spinner {
@@ -75,6 +75,53 @@ import PreviewEditing from "./PreviewEditing.tsx";
     .move-loader-spinner {
       animation-duration: 2.4s;
     }
+  }
+
+  /*
+    An empty container keeps a visible drop area so it can still be hovered and
+    right-clicked. Hovering it says what it is and that it accepts blocks.
+  */
+  [data-empty-container],
+  [data-empty-image] {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: 1px dashed color-mix(in srgb, #53924d 55%, transparent);
+    outline-offset: -1px;
+    transition: background-color 120ms ease, outline-color 120ms ease;
+  }
+
+  [data-empty-container]:hover,
+  [data-empty-image]:hover {
+    background: color-mix(in srgb, #53924d 10%, transparent);
+    outline-color: #53924d;
+  }
+
+  [data-empty-image]::after {
+    content: attr(data-empty-image) " — select it to add an image";
+  }
+
+  [data-empty-container]::after {
+    content: attr(data-empty-container) " — click the plus sign to add an element";
+  }
+
+  [data-empty-container]::after,
+  [data-empty-image]::after {
+    padding: 0.25rem 0.5rem;
+    color: #53924d;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms ease;
+  }
+
+  [data-empty-container]:hover::after,
+  [data-empty-image]:hover::after {
+    opacity: 1;
   }
 
   /*

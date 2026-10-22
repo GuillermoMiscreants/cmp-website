@@ -1,26 +1,28 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
 import { stegaClean } from "@sanity/client/stega";
-import { at, insert as insertAt, remove, set } from "@sanity/mutate";
+import { at, insert as insertAt, remove, set, setIfMissing } from "@sanity/mutate";
 import { decodeSanityNodeData } from "@sanity/visual-editing-csm";
 import { useDocuments, useIsPresentationTool } from "@sanity/visual-editing/react";
 import { defineOverlayPlugin } from "@sanity/visual-editing/unstable_overlay-components";
 import {
   columnPalette,
   createBlock,
+  placeholderFor,
   pagePalette,
   sectionPalette,
   wrapperPalette,
+  type BlockStub,
   type PaletteItem,
   type PaletteType,
 } from "./inserts";
 import { BlockTab } from "./blockTab";
-import { LayersPanel } from "./layers";
+import { LayersPanel, pageDocumentId } from "./layers";
 import { BlockPicker } from "./picker";
 import { refreshBlockLabels, setLabelSource } from "./blockLabels";
 import { installReorder } from "./reorder";
 import { installTextEdit } from "./textEdit";
-import { hideLoader, showLoader } from "./loader";
+import { afterPaint, hideLoader, showLoader } from "./loader";
 
 /** PreviewEditing dispatches this after swapping the page landmark. */
 export const previewContentReplaced = "preview-content-replaced";
@@ -258,11 +260,20 @@ function insertBlock(anchor: Anchor, intoSection: boolean, type: PaletteType): s
   try {
     const doc = getDocument(documentId);
     const block = createBlock(type);
-    showLoader("Adding block…");
     const placed = afterKey ? insertAt(block, "after", { _key: afterKey }) : insertAt(block, "after", -1);
-    void Promise.resolve(doc.patch(() => [at(arrayPath, placed)])).catch((cause: unknown) => {
-      hideLoader();
-      console.error("Could not insert block.", cause);
+    showLoader("Adding block…");
+    afterPaint(() => {
+      try {
+        void Promise.resolve(doc.patch(() => [at(arrayPath, setIfMissing([])), at(arrayPath, placed)])).catch(
+          (cause: unknown) => {
+            hideLoader();
+            console.error("Could not insert block.", cause);
+          },
+        );
+      } catch (cause) {
+        hideLoader();
+        console.error("Could not insert block.", cause);
+      }
     });
     return null;
   } catch (cause) {
@@ -466,9 +477,48 @@ function saveText(id: string, path: string, value: string) {
   return Promise.resolve(doc.patch(() => [at(stegaClean(path), set(value))])).then(() => undefined);
 }
 
+type Bare = { path: string; value: BlockStub };
+
+/** Blocks that hold only a type and a key, found anywhere in the page's lists. */
+function bareBlocks(value: unknown, path: string, found: Bare[] = []) {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (!item || typeof item !== "object" || typeof item._key !== "string") continue;
+      const itemPath = `${path}[_key=="${item._key}"]`;
+      const placeholder = Object.keys(item).every((name) => name === "_type" || name === "_key")
+        ? placeholderFor(String(item._type))
+        : null;
+      if (placeholder) found.push({ path: itemPath, value: { ...placeholder, _key: item._key } });
+      else for (const [name, child] of Object.entries(item)) bareBlocks(child, `${itemPath}.${name}`, found);
+    }
+  }
+  return found;
+}
+
+/** Fills in blocks added from Presentation's own right-click menu, which inserts them empty. */
+async function seedBareBlocks() {
+  const id = pageDocumentId();
+  const getDocument = insertApi.getDocument;
+  if (!id || !getDocument) return;
+  try {
+    const doc = getDocument(id);
+    const snapshot = (await doc.getSnapshot()) as { sections?: unknown } | null;
+    const bare = bareBlocks(snapshot?.sections, "sections");
+    if (bare.length === 0) return;
+    showLoader("Adding placeholder content…");
+    await doc.patch(() => bare.map((block) => at(block.path, set(block.value))));
+  } catch (cause) {
+    hideLoader();
+    console.error("Could not add placeholder content.", cause);
+  }
+}
+
 function ensureInsertUI() {
   installTextEdit(saveText);
-  window.addEventListener(previewContentReplaced, () => void refreshBlockLabels());
+  window.addEventListener(previewContentReplaced, () => {
+    void refreshBlockLabels();
+    void seedBareBlocks();
+  });
   installReorder(
     (id, build) => {
       const getDocument = insertApi.getDocument;

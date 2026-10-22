@@ -21,6 +21,13 @@ const svg = (children: ReactNode) => (
   </svg>
 );
 
+const sectionIcon = svg(
+  <>
+    <rect x="2.5" y="4.5" width="15" height="11" rx="1.5" />
+    <path d="M2.5 8h15" />
+  </>,
+);
+
 const meta: Record<PaletteType, Meta> = {
   eyebrow: {
     group: "elements",
@@ -130,13 +137,16 @@ const meta: Record<PaletteType, Meta> = {
     group: "layouts",
     hint: "A full-width page section",
     keywords: "band row page",
-    icon: svg(
-      <>
-        <rect x="2.5" y="4.5" width="15" height="11" rx="1.5" />
-        <path d="M2.5 8h15" />
-      </>,
-    ),
+    icon: sectionIcon,
   },
+  heroCentered: { group: "layouts", hint: "Centered headline, text and buttons", keywords: "hero banner intro top", icon: sectionIcon },
+  heroSplit: { group: "layouts", hint: "Image beside a headline and text", keywords: "hero banner image split", icon: sectionIcon },
+  textCta: { group: "layouts", hint: "Short text with a call to action", keywords: "cta copy narrow", icon: sectionIcon },
+  featureGrid: { group: "layouts", hint: "A grid of feature cards", keywords: "features cards grid", icon: sectionIcon },
+  iconStats: { group: "layouts", hint: "Cards with icons and figures", keywords: "stats numbers icons", icon: sectionIcon },
+  ctaBand: { group: "layouts", hint: "Dark band with a call to action", keywords: "cta banner band", icon: sectionIcon },
+  logoMarquee: { group: "layouts", hint: "A scrolling row of logos", keywords: "logos customers trusted", icon: sectionIcon },
+  faq: { group: "layouts", hint: "Questions and answers", keywords: "questions answers accordion", icon: sectionIcon },
 };
 
 const tabs: { id: "all" | Group; label: string }[] = [

@@ -26,7 +26,8 @@ export const columns = defineType({
         }),
     }),
     listField('layout', 'Layout', columnsLayout, '1-1', 'Column split. The count must match the number of columns.'),
-    listField('gap', 'Gap', columnsGap, 'md', 'Space between columns.'),
+    listField('gap', 'Column gap', columnsGap, 'md', 'Space between columns, side to side.'),
+    listField('rowGap', 'Row gap', columnsGap, 'md', 'Space between columns when they stack, top to bottom.'),
     listField('verticalAlign', 'Vertical align', verticalAlign, 'top', 'How columns line up with each other.'),
   ],
   preview: {

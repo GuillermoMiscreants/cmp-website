@@ -6,12 +6,6 @@ const failsafeMs = 8000;
 let overlay: HTMLElement | null = null;
 let failsafe: number | undefined;
 
-/**
- * Covers the page while a structural change (move, delete, add) waits for the
- * refreshed content. These round-trip through Sanity, so without this the
- * page looks unchanged for a couple of seconds. Hidden when the page content
- * is replaced.
- */
 /** Hides the loader early, e.g. when the change it waited on failed. */
 export function hideLoader() {
   window.clearTimeout(failsafe);
@@ -23,6 +17,12 @@ export function isLoaderVisible() {
   return overlay?.hasAttribute("data-visible") ?? false;
 }
 
+/**
+ * Covers the page while a structural change (move, delete, add) waits for the
+ * refreshed content. These round-trip through Sanity, so without this the
+ * page looks unchanged for a couple of seconds. Hidden when the page content
+ * is replaced.
+ */
 export function showLoader(label: string) {
   if (!overlay) {
     overlay = document.createElement("div");
@@ -44,4 +44,12 @@ export function showLoader(label: string) {
   window.clearTimeout(failsafe);
   failsafe = window.setTimeout(hide, failsafeMs);
   window.addEventListener(previewContentReplaced, hide, { once: true });
+}
+
+/**
+ * Runs `work` once the browser has painted, so a loader shown in the same
+ * click is on screen before a heavy patch occupies the main thread.
+ */
+export function afterPaint(work: () => void) {
+  requestAnimationFrame(() => window.setTimeout(work, 0));
 }

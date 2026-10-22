@@ -54,9 +54,11 @@ export type LogoMarquee = {
 
 export type CardGrid = {
   _type: "cardGrid";
-  cards?: Array<{
-    _key: string;
-  } & Card>;
+  cards?: Array<
+    {
+      _key: string;
+    } & Card
+  >;
   columns?: "2" | "3" | "4" | "5";
 };
 
@@ -77,7 +79,16 @@ export type Card = {
   button?: Button;
   header?: string;
   body?: string;
-  icon?: "lucide:activity" | "lucide:shield-check" | "lucide:server" | "lucide:headphones" | "lucide:life-buoy" | "lucide:layers" | "lucide:database" | "lucide:zap" | "lucide:settings-2";
+  icon?:
+    | "lucide:activity"
+    | "lucide:shield-check"
+    | "lucide:server"
+    | "lucide:headphones"
+    | "lucide:life-buoy"
+    | "lucide:layers"
+    | "lucide:database"
+    | "lucide:zap"
+    | "lucide:settings-2";
   border?: "all" | "y" | "x" | "none";
   align?: "left" | "center" | "right";
 };
@@ -124,9 +135,11 @@ export type ImageBlock = {
 
 export type ButtonGroup = {
   _type: "buttonGroup";
-  buttons?: Array<{
-    _key: string;
-  } & Button>;
+  buttons?: Array<
+    {
+      _key: string;
+    } & Button
+  >;
   align?: "left" | "center" | "right";
 };
 
@@ -158,7 +171,12 @@ export type RichText = {
     _type: "block";
     _key: string;
   }>;
-  size?: "text-body-xl" | "text-body-lg" | "text-body-md" | "text-body-sm" | "text-body-xsm";
+  size?:
+    | "text-body-xl"
+    | "text-body-lg"
+    | "text-body-md"
+    | "text-body-sm"
+    | "text-body-xsm";
   tone?: "default" | "muted" | "inverse";
   align?: "left" | "center" | "right";
 };
@@ -174,33 +192,44 @@ export type Heading = {
   _type: "heading";
   text?: string;
   level?: "1" | "2" | "3" | "4";
-  size?: "display" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+  size?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   align?: "left" | "center" | "right";
 };
 
 export type ContentWrapper = {
   _type: "contentWrapper";
-  content?: Array<{
-    _key: string;
-  } & Eyebrow | {
-    _key: string;
-  } & Heading | {
-    _key: string;
-  } & RichText | {
-    _key: string;
-  } & ButtonGroup | {
-    _key: string;
-  } & ImageBlock | {
-    _key: string;
-  } & Video | {
-    _key: string;
-  } & Spacer | {
-    _key: string;
-  } & Divider | {
-    _key: string;
-  } & CardGrid | {
-    _key: string;
-  } & ContentWrapper>;
+  content?: Array<
+    | ({
+        _key: string;
+      } & Eyebrow)
+    | ({
+        _key: string;
+      } & Heading)
+    | ({
+        _key: string;
+      } & RichText)
+    | ({
+        _key: string;
+      } & ButtonGroup)
+    | ({
+        _key: string;
+      } & ImageBlock)
+    | ({
+        _key: string;
+      } & Video)
+    | ({
+        _key: string;
+      } & Spacer)
+    | ({
+        _key: string;
+      } & Divider)
+    | ({
+        _key: string;
+      } & CardGrid)
+    | ({
+        _key: string;
+      } & ContentWrapper)
+  >;
   align?: "left" | "center" | "right";
   paddingTop?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
   paddingBottom?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
@@ -208,36 +237,50 @@ export type ContentWrapper = {
 
 export type Column = {
   _type: "column";
-  content?: Array<{
-    _key: string;
-  } & Eyebrow | {
-    _key: string;
-  } & Heading | {
-    _key: string;
-  } & RichText | {
-    _key: string;
-  } & ButtonGroup | {
-    _key: string;
-  } & ImageBlock | {
-    _key: string;
-  } & Video | {
-    _key: string;
-  } & Spacer | {
-    _key: string;
-  } & Divider | {
-    _key: string;
-  } & CardGrid | {
-    _key: string;
-  } & Columns | {
-    _key: string;
-  } & ContentWrapper>;
+  content?: Array<
+    | ({
+        _key: string;
+      } & Eyebrow)
+    | ({
+        _key: string;
+      } & Heading)
+    | ({
+        _key: string;
+      } & RichText)
+    | ({
+        _key: string;
+      } & ButtonGroup)
+    | ({
+        _key: string;
+      } & ImageBlock)
+    | ({
+        _key: string;
+      } & Video)
+    | ({
+        _key: string;
+      } & Spacer)
+    | ({
+        _key: string;
+      } & Divider)
+    | ({
+        _key: string;
+      } & CardGrid)
+    | ({
+        _key: string;
+      } & Columns)
+    | ({
+        _key: string;
+      } & ContentWrapper)
+  >;
 };
 
 export type Columns = {
   _type: "columns";
-  columns?: Array<{
-    _key: string;
-  } & Column>;
+  columns?: Array<
+    {
+      _key: string;
+    } & Column
+  >;
   layout?: "1-1" | "1-1-1" | "2-1" | "1-2" | "1-1-1-1";
   gap?: "sm" | "md" | "lg";
   verticalAlign?: "top" | "center" | "bottom";
@@ -245,29 +288,41 @@ export type Columns = {
 
 export type Section = {
   _type: "section";
-  content?: Array<{
-    _key: string;
-  } & Eyebrow | {
-    _key: string;
-  } & Heading | {
-    _key: string;
-  } & RichText | {
-    _key: string;
-  } & ButtonGroup | {
-    _key: string;
-  } & ImageBlock | {
-    _key: string;
-  } & Video | {
-    _key: string;
-  } & Spacer | {
-    _key: string;
-  } & Divider | {
-    _key: string;
-  } & CardGrid | {
-    _key: string;
-  } & Columns | {
-    _key: string;
-  } & ContentWrapper>;
+  content?: Array<
+    | ({
+        _key: string;
+      } & Eyebrow)
+    | ({
+        _key: string;
+      } & Heading)
+    | ({
+        _key: string;
+      } & RichText)
+    | ({
+        _key: string;
+      } & ButtonGroup)
+    | ({
+        _key: string;
+      } & ImageBlock)
+    | ({
+        _key: string;
+      } & Video)
+    | ({
+        _key: string;
+      } & Spacer)
+    | ({
+        _key: string;
+      } & Divider)
+    | ({
+        _key: string;
+      } & CardGrid)
+    | ({
+        _key: string;
+      } & Columns)
+    | ({
+        _key: string;
+      } & ContentWrapper)
+  >;
   variant?: "default" | "narrow" | "wide";
   background?: "none" | "muted" | "dark" | "brand";
   paddingTop?: "sm" | "md" | "lg" | "xl";
@@ -357,25 +412,35 @@ export type Page = {
   slug?: Slug;
   seo?: Seo;
   jsonLd?: string;
-  sections?: Array<{
-    _key: string;
-  } & Section | {
-    _key: string;
-  } & Section | {
-    _key: string;
-  } & Section | {
-    _key: string;
-  } & Section | {
-    _key: string;
-  } & Section | {
-    _key: string;
-  } & Section | {
-    _key: string;
-  } & Section | {
-    _key: string;
-  } & LogoMarquee | {
-    _key: string;
-  } & Faq>;
+  sections?: Array<
+    | ({
+        _key: string;
+      } & Section)
+    | ({
+        _key: string;
+      } & Section)
+    | ({
+        _key: string;
+      } & Section)
+    | ({
+        _key: string;
+      } & Section)
+    | ({
+        _key: string;
+      } & Section)
+    | ({
+        _key: string;
+      } & Section)
+    | ({
+        _key: string;
+      } & Section)
+    | ({
+        _key: string;
+      } & LogoMarquee)
+    | ({
+        _key: string;
+      } & Faq)
+  >;
 };
 
 export type Slug = {
@@ -481,46 +546,83 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type AllSanitySchemaTypes = Faq | SanityImageAssetReference | LogoMarquee | CardGrid | Card | Divider | Spacer | Video | ImageBlock | ButtonGroup | Button | RichText | Eyebrow | Heading | ContentWrapper | Column | Columns | Section | PageReference | Link | Seo | SiteSettings | SanityImageCrop | SanityImageHotspot | Page | Slug | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageMetadata | SanityFileAsset | SanityAssetSourceData | SanityImageAsset | Geopoint;
+export type AllSanitySchemaTypes =
+  | Faq
+  | SanityImageAssetReference
+  | LogoMarquee
+  | CardGrid
+  | Card
+  | Divider
+  | Spacer
+  | Video
+  | ImageBlock
+  | ButtonGroup
+  | Button
+  | RichText
+  | Eyebrow
+  | Heading
+  | ContentWrapper
+  | Column
+  | Columns
+  | Section
+  | PageReference
+  | Link
+  | Seo
+  | SiteSettings
+  | SanityImageCrop
+  | SanityImageHotspot
+  | Page
+  | Slug
+  | SanityImagePaletteSwatch
+  | SanityImagePalette
+  | SanityImageDimensions
+  | SanityImageMetadata
+  | SanityFileAsset
+  | SanityAssetSourceData
+  | SanityImageAsset
+  | Geopoint;
 
 // Source: ../web/src/lib/sanity/queries.ts
 // Variable: siteSettingsQuery
 // Query: *[_id == "siteSettings"][0]{    _id,    siteTitle,    footerTagline,    footerCopyright,    logo{  ...,  alt,  "dimensions": asset->metadata.dimensions},    nav[]{      _key,      label,      link{  type,  openInNewTab,  anchor,  external,  internal->{ "slug": slug.current }}    }  }
-export type SiteSettingsQueryResult = {
-  _id: "siteSettings";
-  siteTitle: null;
-  footerTagline: null;
-  footerCopyright: null;
-  logo: null;
-  nav: null;
-} | {
-  _id: "siteSettings";
-  siteTitle: string | null;
-  footerTagline: string | null;
-  footerCopyright: string | null;
-  logo: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt: string | null;
-    _type: "image";
-    dimensions: SanityImageDimensions | null;
-  } | null;
-  nav: Array<{
-    _key: string;
-    label: string | null;
-    link: {
-      type: "external" | "internal" | null;
-      openInNewTab: boolean | null;
-      anchor: string | null;
-      external: string | null;
-      internal: {
-        slug: string | null;
+export type SiteSettingsQueryResult =
+  | {
+      _id: "siteSettings";
+      siteTitle: null;
+      footerTagline: null;
+      footerCopyright: null;
+      logo: null;
+      nav: null;
+    }
+  | {
+      _id: "siteSettings";
+      siteTitle: string | null;
+      footerTagline: string | null;
+      footerCopyright: string | null;
+      logo: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        alt: string | null;
+        _type: "image";
+        dimensions: SanityImageDimensions | null;
       } | null;
-    } | null;
-  }> | null;
-} | null;
+      nav: Array<{
+        _key: string;
+        label: string | null;
+        link: {
+          type: "external" | "internal" | null;
+          openInNewTab: boolean | null;
+          anchor: string | null;
+          external: string | null;
+          internal: {
+            slug: string | null;
+          } | null;
+        } | null;
+      }> | null;
+    }
+  | null;
 
 // Source: ../web/src/lib/sanity/queries.ts
 // Variable: PAGES_QUERY
@@ -541,12 +643,14 @@ export type PAGE_SLUGS_QUERY_RESULT = Array<{
 }>;
 
 // Query TypeMap
-import "@sanity/client";
-declare module "@sanity/client" {
+declare global {
   interface SanityQueries {
-    "\n  *[_id == \"siteSettings\"][0]{\n    _id,\n    siteTitle,\n    footerTagline,\n    footerCopyright,\n    logo{\n  ...,\n  alt,\n  \"dimensions\": asset->metadata.dimensions\n},\n    nav[]{\n      _key,\n      label,\n      link{\n  type,\n  openInNewTab,\n  anchor,\n  external,\n  internal->{ \"slug\": slug.current }\n}\n    }\n  }\n": SiteSettingsQueryResult;
-    "*[_type == \"page\" && defined(slug.current)] | order(_createdAt desc){ _id, title, \"slug\": slug.current }": PAGES_QUERY_RESULT;
-    "*[_type == \"page\" && defined(slug.current) && slug.current != \"home\"]{ \"params\": { \"slug\": slug.current } }": PAGE_SLUGS_QUERY_RESULT;
+    '\n  *[_id == "siteSettings"][0]{\n    _id,\n    siteTitle,\n    footerTagline,\n    footerCopyright,\n    logo{\n  ...,\n  alt,\n  "dimensions": asset->metadata.dimensions\n},\n    nav[]{\n      _key,\n      label,\n      link{\n  type,\n  openInNewTab,\n  anchor,\n  external,\n  internal->{ "slug": slug.current }\n}\n    }\n  }\n': SiteSettingsQueryResult;
+    '*[_type == "page" && defined(slug.current)] | order(_createdAt desc){ _id, title, "slug": slug.current }': PAGES_QUERY_RESULT;
+    '*[_type == "page" && defined(slug.current) && slug.current != "home"]{ "params": { "slug": slug.current } }': PAGE_SLUGS_QUERY_RESULT;
   }
 }
-
+// Lets @sanity/client releases that predate the global registry read it too
+declare module "@sanity/client" {
+  interface SanityQueries extends globalThis.SanityQueries {}
+}

@@ -65,6 +65,7 @@ function contentProjection(depth: number): string {
     _type == "columns" => {
       layout,
       gap,
+      rowGap,
       verticalAlign,
       columns[]{
         _key,

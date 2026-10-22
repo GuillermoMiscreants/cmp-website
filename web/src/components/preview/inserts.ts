@@ -1,3 +1,5 @@
+import { ctaBand, faqPlaceholder, featureGrid, heroCentered, heroSplit, iconStats, plainSection, textCta } from "../../lib/templates";
+
 export type BlockStub = { _type: string; _key: string } & Record<string, unknown>;
 
 function key() {
@@ -59,6 +61,17 @@ function card(title: string): BlockStub {
   };
 }
 
+function contentWrapper(): BlockStub {
+  return {
+    _type: "contentWrapper",
+    _key: key(),
+    align: "left",
+    paddingTop: "none",
+    paddingBottom: "none",
+    content: [heading(), richText(LOREM_SHORT)],
+  };
+}
+
 const creators = {
   eyebrow: (): BlockStub => ({
     _type: "eyebrow",
@@ -99,30 +112,27 @@ const creators = {
     _key: key(),
     layout: "1-1",
     gap: "md",
+    rowGap: "md",
     verticalAlign: "top",
     columns: [
-      { _type: "column", _key: key(), content: [heading(), richText(LOREM_SHORT)] },
-      { _type: "column", _key: key(), content: [heading(), richText(LOREM_SHORT)] },
+      { _type: "column", _key: key(), content: [contentWrapper()] },
+      { _type: "column", _key: key(), content: [contentWrapper()] },
     ],
   }),
-  contentWrapper: (): BlockStub => ({
-    _type: "contentWrapper",
+  contentWrapper: () => contentWrapper(),
+  section: (): BlockStub => ({ _type: "section", _key: key(), ...plainSection }),
+  heroCentered: (): BlockStub => ({ _type: "section", _key: key(), ...heroCentered }),
+  heroSplit: (): BlockStub => ({ _type: "section", _key: key(), ...heroSplit }),
+  textCta: (): BlockStub => ({ _type: "section", _key: key(), ...textCta }),
+  featureGrid: (): BlockStub => ({ _type: "section", _key: key(), ...featureGrid }),
+  iconStats: (): BlockStub => ({ _type: "section", _key: key(), ...iconStats }),
+  ctaBand: (): BlockStub => ({ _type: "section", _key: key(), ...ctaBand }),
+  faq: (): BlockStub => ({ _type: "faq", _key: key(), ...faqPlaceholder }),
+  logoMarquee: (): BlockStub => ({
+    _type: "logoMarquee",
     _key: key(),
-    align: "left",
-    paddingTop: "none",
-    paddingBottom: "none",
-    content: [heading(), richText(LOREM_SHORT)],
-  }),
-  section: (): BlockStub => ({
-    _type: "section",
-    _key: key(),
-    variant: "default",
+    label: "Trusted by leading data companies",
     background: "none",
-    paddingTop: "md",
-    paddingBottom: "md",
-    align: "left",
-    borderTop: false,
-    content: [heading(), richText()],
   }),
 } as const;
 
@@ -159,8 +169,27 @@ export const columnPalette: PaletteItem[] = [
 export const sectionPalette: PaletteItem[] = columnPalette;
 
 /** A section is only added after another section. */
-export const pagePalette: PaletteItem[] = [{ type: "section", label: "Section" }];
+export const pagePalette: PaletteItem[] = [
+  { type: "section", label: "Section" },
+  { type: "heroCentered", label: "Hero – centered" },
+  { type: "heroSplit", label: "Hero – split" },
+  { type: "textCta", label: "Text + CTA" },
+  { type: "featureGrid", label: "Feature grid" },
+  { type: "iconStats", label: "Icon stats" },
+  { type: "ctaBand", label: "CTA band" },
+  { type: "logoMarquee", label: "Logo marquee" },
+  { type: "faq", label: "FAQ" },
+];
 
 export function createBlock(type: PaletteType) {
   return creators[type]();
+}
+
+/**
+ * The starter content for a block Studio's own insert menu left bare. That menu adds only a type and a
+ * key, and ignores the schema's initial values, so a new FAQ or content wrapper would sit empty.
+ */
+export function placeholderFor(type: string): BlockStub | null {
+  if (type === "faq" || type === "logoMarquee" || type === "cardGrid" || type === "columns" || type === "contentWrapper") return creators[type]();
+  return null;
 }

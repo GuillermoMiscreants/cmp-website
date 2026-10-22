@@ -22,8 +22,9 @@ const content = block.content ?? [];
       alignClass[align],
       padTop,
       padBottom,
-      preview && content.length === 0 && "min-h-16",
+      preview && content.length === 0 && "min-h-24",
     ]}
+    data-empty-container={preview && content.length === 0 ? "Empty content wrapper" : undefined}
     data-sanity={dataSanity(preview, documentId, `${path}.content`)}
   >
     <Blocks

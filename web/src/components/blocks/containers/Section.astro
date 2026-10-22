@@ -65,7 +65,11 @@ const align = (["left", "center", "right"] as const).includes(clean(block.align)
   data-sanity={dataSanity(preview, documentId, path)}
   contentClass={[width.contentClass, alignClass[align]].filter(Boolean).join(" ")}
 >
-  <div data-sanity={dataSanity(preview, documentId, `${path}.content`)}>
+  <div
+    class:list={["w-full", preview && (block.content ?? []).length === 0 && "min-h-24"]}
+    data-empty-container={preview && (block.content ?? []).length === 0 ? "Empty section" : undefined}
+    data-sanity={dataSanity(preview, documentId, `${path}.content`)}
+  >
     <Blocks
       blocks={block.content ?? []}
       preview={preview}

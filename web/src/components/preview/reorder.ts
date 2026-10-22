@@ -3,7 +3,7 @@ import { at, insert, remove, type NodePatchList } from "@sanity/mutate";
 import { getAtPath, parse } from "@sanity/mutate/path";
 import { decodeSanityNodeData } from "@sanity/visual-editing-csm";
 
-import { showLoader } from "./loader";
+import { afterPaint, showLoader } from "./loader";
 
 type Flow = "horizontal" | "vertical";
 
@@ -31,7 +31,7 @@ export function installReorder(
   onRemove = remove
     ? (item) => {
         showLoader("Deleting section…");
-        remove(item);
+        afterPaint(() => remove(item));
       }
     : null;
 
@@ -421,12 +421,14 @@ function moveItem(
   const position = insertAt >= others.length ? "after" : "before";
 
   showLoader("Moving section…");
-  apply(dragged.id, (snapshot: unknown) => {
-    const value = getAtPath(parse(dragged.path), snapshot);
-    if (!value || typeof value !== "object") throw new Error("Block is not ready.");
-    return [
-      at(dragged.arrayPath, remove({ _key: dragged.key })),
-      at(dragged.arrayPath, insert(value, position, { _key: reference.key })),
-    ];
-  });
+  afterPaint(() =>
+    apply(dragged.id, (snapshot: unknown) => {
+      const value = getAtPath(parse(dragged.path), snapshot);
+      if (!value || typeof value !== "object") throw new Error("Block is not ready.");
+      return [
+        at(dragged.arrayPath, remove({ _key: dragged.key })),
+        at(dragged.arrayPath, insert(value, position, { _key: reference.key })),
+      ];
+    }),
+  );
 }

@@ -4,6 +4,7 @@ import Grid from "../../Grid.astro";
 import {
   columnsLayoutSpec,
   gapClass,
+  rowGapClass,
   verticalAlignClass,
   type ColumnsLayout,
 } from "../../../lib/variants";
@@ -15,7 +16,7 @@ type Props = BlockRenderProps;
 const { block, preview, documentId, path, inheritedAlign = "left" } = Astro.props;
 const layout = clean(block.layout) as ColumnsLayout;
 const spec = columnsLayoutSpec[layout] ?? columnsLayoutSpec["1-1"];
-const gap = pick(gapClass, block.gap, "md");
+const gap = [pick(gapClass, block.gap, "md"), pick(rowGapClass, block.rowGap || block.gap, "md")].join(" ");
 const vertical = pick(verticalAlignClass, block.verticalAlign, "top");
 const columns = Array.isArray(block.columns) ? block.columns : [];
 ---
@@ -30,7 +31,11 @@ const columns = Array.isArray(block.columns) ? block.columns : [];
         {
           columns.map((column, index) => (
             <div class:list={[spec.spans?.[index] === 2 && "md:col-span-2"]} data-sanity={dataSanity(preview, documentId, `${path}.columns[_key=="${column._key}"]`)}>
-              <div data-sanity={dataSanity(preview, documentId, `${path}.columns[_key=="${column._key}"].content`)}>
+              <div
+                class:list={["w-full", preview && (column.content ?? []).length === 0 && "min-h-24"]}
+                data-empty-container={preview && (column.content ?? []).length === 0 ? "Empty column" : undefined}
+                data-sanity={dataSanity(preview, documentId, `${path}.columns[_key=="${column._key}"].content`)}
+              >
                 <Blocks
                   blocks={column.content ?? []}
                   preview={preview}
@@ -55,7 +60,11 @@ const columns = Array.isArray(block.columns) ? block.columns : [];
         {
           columns.map((column) => (
             <div data-sanity={dataSanity(preview, documentId, `${path}.columns[_key=="${column._key}"]`)}>
-              <div data-sanity={dataSanity(preview, documentId, `${path}.columns[_key=="${column._key}"].content`)}>
+              <div
+                class:list={["w-full", preview && (column.content ?? []).length === 0 && "min-h-24"]}
+                data-empty-container={preview && (column.content ?? []).length === 0 ? "Empty column" : undefined}
+                data-sanity={dataSanity(preview, documentId, `${path}.columns[_key=="${column._key}"].content`)}
+              >
                 <Blocks
                   blocks={column.content ?? []}
                   preview={preview}

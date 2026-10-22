@@ -164,6 +164,18 @@ function onUndoKey(event: KeyboardEvent) {
   });
 }
 
+/**
+ * Presentation's overlay listens to the pointer to start its own drag and open fields, and it can
+ * cancel the default that moves the caret. While typing, keep pointer events on the edited text
+ * away from it, and from the page's drag handling, without cancelling them. The browser then
+ * places the caret or selects text where the user clicked.
+ */
+function onPointer(event: Event) {
+  if (session && event.target instanceof Node && session.element.contains(event.target)) {
+    event.stopImmediatePropagation();
+  }
+}
+
 function onClick(event: MouseEvent) {
   // Placing the caret, double-click to select a word, shift-click to extend: each is a click on the
   // text being edited. Left alone, Presentation sees it and opens the field in the Studio panel.
@@ -199,6 +211,9 @@ export function installTextEdit(save: Write) {
   write = save;
   if (installed) return;
   installed = true;
+  for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup", "dragstart", "selectstart"]) {
+    window.addEventListener(type, onPointer, true);
+  }
   window.addEventListener("click", onClick, true);
   window.addEventListener("dblclick", onDoubleClick, true);
   window.addEventListener("keydown", onUndoKey);
