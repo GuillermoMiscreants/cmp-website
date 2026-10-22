@@ -19,10 +19,10 @@ const label = caption ?? block.caption;
 ---
 
 {
-  !source?.asset && preview && (
+  !source?.asset && (
     <figure
       class:list={["w-full bg-panel-muted", radius, clean(block.aspect) === "auto" || !cropped ? "aspect-video" : aspect]}
-      data-empty-image="Empty image"
+      data-empty-image={preview ? "Empty image" : undefined}
       data-sanity={dataSanity(preview, documentId, path)}
     />
   )
